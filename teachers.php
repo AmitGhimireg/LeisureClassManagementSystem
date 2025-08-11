@@ -22,7 +22,7 @@ include('partial-front/login-check.php');
         <div class="row" id="teachersList">
             <?php
             // SQL query to fetch all teachers from the database for the initial page load
-            $sql = "SELECT * FROM teachers";
+            $sql = "SELECT * FROM teachers WHERE role = 'teacher'";
             $res = mysqli_query($conn, $sql);
 
             if (mysqli_num_rows($res) > 0) {

@@ -1,0 +1,200 @@
+:root {
+    --primary-color: #2c3e50; /* A dark, professional blue */
+    --secondary-color: #34495e; /* A slightly darker blue for hover */
+    --background-color: #ecf0f1; /* Light gray for the main background */
+    --card-bg-color: #ffffff; /* White cards */
+    --text-color: #34495e; /* Dark text */
+    --sidebar-bg-color: #2c3e50;
+    --sidebar-hover-color: #34495e;
+    --sidebar-active-color: #3c526a;
+    --success-color: #27ae60;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --info-color: #3498db;
+    --border-color: #e0e0e0;
+}
+
+body {
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--background-color);
+}
+
+#wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+#sidebar-wrapper {
+    min-height: 100vh;
+    width: 250px;
+    background-color: var(--sidebar-bg-color);
+    transition: margin 0.3s ease-in-out;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -250px;
+}
+
+#page-content-wrapper {
+    min-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-color);
+}
+
+#wrapper.toggled #page-content-wrapper {
+    min-width: 100%;
+}
+
+.sidebar-heading {
+    padding: 1.5rem 1rem;
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.list-group-item {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-left: 5px solid transparent;
+    padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.list-group-item:hover {
+    color: #fff;
+    background-color: var(--sidebar-hover-color);
+    border-left-color: var(--info-color);
+}
+
+.list-group-item.active {
+    background-color: var(--sidebar-active-color);
+    color: #fff;
+    border-left-color: var(--info-color);
+    font-weight: 600;
+}
+
+.list-group-item .bi {
+    font-size: 1.2rem;
+    margin-right: 0.75rem;
+}
+
+#logout-btn {
+    color: var(--danger-color) !important;
+    font-weight: 600;
+}
+
+#logout-btn:hover {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: var(--danger-color) !important;
+}
+
+.navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+#menu-toggle {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.dropdown-menu {
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+}
+
+.stat-card {
+    background-color: var(--card-bg-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card .fs-2 {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.stat-card p {
+    color: #7f8c8d;
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+.stat-card .icon-primary { color: var(--info-color); }
+.stat-card .icon-success { color: var(--success-color); }
+.stat-card .icon-warning { color: var(--warning-color); }
+.stat-card .icon-info { color: var(--primary-color); }
+
+.table {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+}
+
+.table thead th {
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+}
+
+.table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.modal-content {
+    border-radius: 0.75rem;
+}
+
+footer {
+    background-color: var(--primary-color);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 1.5rem 0;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+footer a {
+    color: var(--info-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+footer a:hover {
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: -250px;
+    }
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+    #page-content-wrapper {
+        min-width: 100vw;
+    }
+    #wrapper.toggled #page-content-wrapper {
+        min-width: calc(100vw - 250px);
+    }
+}

@@ -1,7 +1,7 @@
 <?php
 // Include necessary files for the page to function
-include('partial-front/navbar.php');
-include('partial-front/login-check.php');
+include('partial-admin/navbar.php');
+include('partial-admin/login-check.php');
 
 // Check if a teacher's ID is stored in the session
 if (isset($_SESSION['teach_id'])) {
@@ -36,7 +36,7 @@ if (isset($_SESSION['teach_id'])) {
 
 <div class="main-content">
     <div class="container mt-4">
-        <h2 class="text-center mb-4">Teacher Profile</h2>
+        <h2 class="text-center mb-4">Admin Profile</h2>
 
         <?php
         // Display any session messages, like a success message after an update
@@ -91,11 +91,10 @@ if (isset($_SESSION['teach_id'])) {
                         </div>
                         <hr>
                         <div class="d-flex justify-content-end">
-                            <a href="<?php echo SITEURL; ?>update-profile.php?id=<?php echo $teach_id; ?>" class="btn btn-primary me-2">Update Profile</a>
-                            <a href="<?php echo SITEURL; ?>change-password.php?id=<?php echo $teach_id; ?>" class="btn btn-secondary me-2">Change Password</a>
-                            <a href="<?php echo SITEURL; ?>attendance.php?id=<?php echo $teach_id; ?>" class="btn btn-success me-2">Mark Attendance</a>
-                            <a href="<?php echo SITEURL; ?>logout.php?id=<?php echo $teach_id; ?>" class="btn btn-warning text-white me-2" onclick="return confirm('Are you sure you want to logout from your account? This action cannot be undone.');">Logout Account</a>
-                            <a href="<?php echo SITEURL; ?>delete-profile.php?id=<?php echo $teach_id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">Delete Account</a>
+                            <a href="<?php echo SITEURL; ?>admin/update-profile.php?id=<?php echo $teach_id; ?>" class="btn btn-primary me-2">Update Profile</a>
+                            <a href="<?php echo SITEURL; ?>admin/change-password.php?id=<?php echo $teach_id; ?>" class="btn btn-secondary me-2">Change Password</a>
+                            <a href="<?php echo SITEURL; ?>admin/logout.php?id=<?php echo $teach_id; ?>" class="btn btn-warning text-white me-2" onclick="return confirm('Are you sure you want to logout from your account? This action cannot be undone.');">Logout Account</a>
+                            <a href="<?php echo SITEURL; ?>admin/delete-profile.php?id=<?php echo $teach_id; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">Delete Account</a>
                         </div>
                     </div>
                 </div>
@@ -103,5 +102,6 @@ if (isset($_SESSION['teach_id'])) {
         </div>
     </div>
 </div>
+<br>
 
-<?php include('partial-front/footer.php'); ?>
+<?php include('partial-admin/footer.php'); ?>

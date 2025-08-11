@@ -1,6 +1,6 @@
 <?php
-include('partial-front/navbar.php');
-include('partial-front/login-check.php');
+include('partial-admin/navbar.php');
+include('partial-admin/login-check.php');
 
 // Check if a teacher ID is set in the URL
 if(isset($_GET['id']))
@@ -10,7 +10,7 @@ if(isset($_GET['id']))
     // Check if the ID from the URL matches the logged-in user's ID
     if($teach_id != $_SESSION['teach_id']) {
         $_SESSION['unauthorized'] = "<div class='error'>Unauthorized Access.</div>";
-        header('location:' . SITEURL . 'user_profile.php');
+        header('location:' . SITEURL . 'admin_profile.php');
         exit();
     }
 
@@ -27,19 +27,19 @@ if(isset($_GET['id']))
         $email = $row['email'];
         $photo = $row['photo'];
         // New: Get PAN and level from the database
-        $pan = $row['pan'];
+        $pan = $row['pan']; 
         $level = $row['level'];
     }
     else
     {
         $_SESSION['not_found'] = "<div class='error'>Teacher not found.</div>";
-        header('location:' . SITEURL . 'user_profile.php');
+        header('location:' . SITEURL . 'admin/admin_profile.php');
         exit();
     }
 }
 else
 {
-    header('location:' . SITEURL . 'user_profile.php');
+    header('location:' . SITEURL . 'admin/admin_profile.php');
     exit();
 }
 
@@ -76,7 +76,7 @@ if(isset($_POST['submit']))
             if($upload == false)
             {
                 $_SESSION['upload'] = "<div class='error'>Failed to upload new photo.</div>";
-                header('location:'.SITEURL.'update-profile.php?id='.$teach_id);
+                header('location:'.SITEURL.'admin/update-profile.php?id='.$teach_id);
                 exit();
             }
 
@@ -89,7 +89,7 @@ if(isset($_POST['submit']))
                     if($remove == false)
                     {
                         $_SESSION['remove-failed'] = "<div class='error'>Failed to remove old photo.</div>";
-                        header('location:'.SITEURL.'update-profile.php?id='.$teach_id);
+                        header('location:'.SITEURL.'admin/update-profile.php?id='.$teach_id);
                         exit();
                     }
                 }
@@ -124,13 +124,13 @@ if(isset($_POST['submit']))
         $_SESSION['update'] = "<div class='alert alert-success'>Profile Updated Successfully.</div>";
         // Update the session username as well
         $_SESSION['username'] = $new_username; 
-        header('location:'.SITEURL.'user_profile.php');
+        header('location:'.SITEURL.'admin/admin_profile.php');
         exit();
     }
     else
     {
         $_SESSION['update'] = "<div class='alert alert-danger'>Failed to Update Profile.</div>";
-        header('location:'.SITEURL.'update-profile.php?id='.$teach_id);
+        header('location:'.SITEURL.'admin/update-profile.php?id='.$teach_id);
         exit();
     }
 }
@@ -182,11 +182,11 @@ if(isset($_POST['submit']))
                             <input type="email" class="form-control" id="email" name="email" value="<?php echo $email; ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label for="pan" class="form-label">PAN Number</label>
+                            <label for="pan" class="form-label">PAN Number (Optional)</label>
                             <input type="text" class="form-control" id="pan" name="pan" value="<?php echo $pan; ?>" placeholder="e.g. ABCDE1234F">
                         </div>
                         <div class="mb-3">
-                            <label for="level" class="form-label">Level</label>
+                            <label for="level" class="form-label">Level (For Teachers Only)</label>
                             <select class="form-select" id="level" name="level">
                                 <option value="" <?php if($level == "") echo "selected"; ?>>N/A</option>
                                 <option value="Basic" <?php if($level == "basic") echo "selected"; ?>>Basic</option>
@@ -195,7 +195,7 @@ if(isset($_POST['submit']))
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" name="submit" class="btn btn-primary">Update Profile</button>
-                            <a href="<?php echo SITEURL; ?>user_profile.php" class="btn btn-secondary">Cancel</a>
+                            <a href="<?php echo SITEURL; ?>admin/admin_profile.php" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -204,4 +204,4 @@ if(isset($_POST['submit']))
     </div>
 </div>
 
-<?php include('partial-front/footer.php'); ?>
+<?php include('partial-admin/footer.php'); ?>

@@ -5,6 +5,8 @@ if (isset($_POST['submit'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = $_POST['password'];
 
+    // Updated SQL query to select all fields from the teachers table.
+    // This assumes you have already added the 'role' column using the ALTER TABLE command.
     $sql = "SELECT * FROM teachers WHERE email = '$email'";
     $res = mysqli_query($conn, $sql);
 
@@ -15,11 +17,20 @@ if (isset($_POST['submit'])) {
         if (password_verify($password, $hashed_password)) {
             $_SESSION['login'] = "<div class='alert alert-success'>Login Successful!</div>";
             $_SESSION['email'] = $email;
-            $_SESSION['teach_id'] = $row['teach_id']; // Using teach_id for consistency
-            $_SESSION['username'] = $row['username']; // Setting the username in the session
+            $_SESSION['teach_id'] = $row['teach_id'];
+            $_SESSION['username'] = $row['username'];
             $_SESSION['logged'] = true;
+            
+            // Store the user's role in the session
+            $_SESSION['role'] = $row['role'];
 
-            header('location:' . SITEURL . 'index.php');
+            // Redirect based on the user's role
+            if ($row['role'] == 'admin') {
+                header('location:' . SITEURL . 'admin/index.php');
+            } else {
+                // Default redirection for 'teacher' or any other role
+                header('location:' . SITEURL . 'index.php');
+            }
             exit();
         } else {
             $_SESSION['login'] = "<div class='alert alert-danger'>Email or Password Did Not Match</div>";
@@ -52,7 +63,7 @@ if (isset($_POST['submit'])) {
                 <div class="col-md-7 col-lg-6">
                     <div class="card p-4 shadow-sm">
                         <h2 class="text-center mb-4 card-title">Login</h2>
-                        <p class="text-center text-muted mb-4">Sign in to your teacher account.</p>
+                        <p class="text-center text-muted mb-4">Sign in to your account.</p>
                         <?php
                         if (isset($_SESSION['login'])) {
                             echo $_SESSION['login'];
@@ -109,6 +120,7 @@ if (isset($_POST['submit'])) {
         this.querySelector('i').classList.toggle('fa-eye-slash');
     });
 </script>
-    <?php include('partial-front/footer.php'); ?>
+
+<?php include('partial-front/footer.php'); ?>
 </body>
 </html>

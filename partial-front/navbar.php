@@ -11,7 +11,7 @@ $is_logged_in = isset($_SESSION['teach_id']) && isset($_SESSION['username']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M.R.A.S.S. - Manakamana Ratna Ambika Secondary School</title>
+    <title>M.R.A.S.S. - Teacher Panel</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -21,7 +21,8 @@ $is_logged_in = isset($_SESSION['teach_id']) && isset($_SESSION['username']);
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.php">M.R.A.S.S.</a>
+            <a class="navbar-brand" href="index.php"> 
+                <i class="bi bi-mortarboard-fill me-2"> </i> M.R.A.S.S. </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -42,20 +43,17 @@ $is_logged_in = isset($_SESSION['teach_id']) && isset($_SESSION['username']);
                     <?php if ($is_logged_in): ?>
                         <li class="nav-item">
                             <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'user_profile.php') ? 'active' : ''; ?>" href="user_profile.php">
-                                <?php echo htmlspecialchars($_SESSION['username']); ?>
+                                <i class="bi bi-person-circle"></i> <?php echo htmlspecialchars($_SESSION['username']); ?>
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
-                            <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'logout.php') ? 'active' : ''; ?>" href="logout.php">LOGOUT</a>
-                        </li> -->
-                    <?php else: ?>
+                    <!-- <?php else: ?>
                         <li class="nav-item">
                             <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'login.php') ? 'active' : ''; ?>" href="login.php">LOGIN</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'register.php') ? 'active' : ''; ?>" href="register.php">REGISTER</a>
                         </li>
-                    <?php endif; ?>
+                    <?php endif; ?> -->
                 </ul>
             </div>
         </div>
