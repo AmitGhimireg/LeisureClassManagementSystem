@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 03, 2025 at 04:43 PM
+-- Generation Time: Aug 12, 2025 at 06:18 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,40 +24,37 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `academic_routines`
+-- Table structure for table `academic_routine`
 --
 
-CREATE TABLE `academic_routines` (
+CREATE TABLE `academic_routine` (
   `ar_id` int(11) NOT NULL,
-  `day` enum('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday') NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `subject_id` int(11) NOT NULL,
+  `class_id` int(11) DEFAULT NULL,
+  `start_time` time DEFAULT NULL,
+  `end_time` time DEFAULT NULL,
+  `subject_id1` int(11) DEFAULT NULL,
+  `subject_id2` int(11) DEFAULT NULL,
+  `teacher_id1` int(11) DEFAULT NULL,
+  `teacher_id2` int(11) DEFAULT NULL,
+  `day_range1` enum('1-3','4-6','1-6') DEFAULT NULL,
+  `day_range2` enum('1-3','4-6','1-6') DEFAULT NULL,
   `is_break` enum('0','1') NOT NULL DEFAULT '0',
-  `class_id` int(11) NOT NULL,
-  `teacher_id` int(11) NOT NULL
+  `is_leisure` enum('0','1') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `admins`
+-- Dumping data for table `academic_routine`
 --
 
-CREATE TABLE `admins` (
-  `adm_id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `full_name` varchar(100) NOT NULL,
-  `contact` varchar(20) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `pan` varchar(20) DEFAULT NULL,
-  `photo` varchar(255) DEFAULT NULL,
-  `password` varchar(255) NOT NULL,
-  `otp` varchar(10) DEFAULT NULL,
-  `verified` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `level` enum('basic','secondary') DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `academic_routine` (`ar_id`, `class_id`, `start_time`, `end_time`, `subject_id1`, `subject_id2`, `teacher_id1`, `teacher_id2`, `day_range1`, `day_range2`, `is_break`, `is_leisure`) VALUES
+(1, 1, '10:15:00', '11:00:00', 3, NULL, 2, NULL, '1-6', NULL, '0', NULL),
+(2, 1, '11:00:00', '11:45:00', 2, NULL, 2, NULL, '1-6', NULL, '0', NULL),
+(3, 1, '11:45:00', '12:30:00', 4, NULL, 2, NULL, '1-6', NULL, '0', NULL),
+(4, 1, '12:30:00', '13:15:00', 1, NULL, 2, NULL, '1-6', NULL, '0', NULL),
+(5, 1, '13:15:00', '14:00:00', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL),
+(9, 1, '14:00:00', '14:40:00', 9, 8, 7, 2, '1-3', '4-6', '0', NULL),
+(10, 1, '14:40:00', '15:20:00', 7, NULL, 7, NULL, '1-6', NULL, '0', NULL),
+(11, 1, '15:20:00', '16:00:00', 10, 12, 2, 7, '1-3', '4-6', '0', NULL);
 
 -- --------------------------------------------------------
 
@@ -69,7 +66,7 @@ CREATE TABLE `attendance` (
   `att_id` int(11) NOT NULL,
   `teacher_id` int(11) NOT NULL,
   `date` date NOT NULL,
-  `status` enum('Present','Absent','Leave') NOT NULL,
+  `status` enum('Present','Absent') NOT NULL,
   `reason` text DEFAULT NULL,
   `recorded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -79,7 +76,8 @@ CREATE TABLE `attendance` (
 --
 
 INSERT INTO `attendance` (`att_id`, `teacher_id`, `date`, `status`, `reason`, `recorded_at`) VALUES
-(1, 1, '2025-08-03', 'Absent', 'Sick', '2025-08-03 14:24:06');
+(8, 7, '2025-08-12', 'Absent', 'Sick', '2025-08-12 15:25:40'),
+(9, 2, '2025-08-12', 'Present', 'Hello', '2025-08-12 15:42:36');
 
 -- --------------------------------------------------------
 
@@ -90,7 +88,7 @@ INSERT INTO `attendance` (`att_id`, `teacher_id`, `date`, `status`, `reason`, `r
 CREATE TABLE `classes` (
   `cls_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `section` enum('A','B','C') NOT NULL,
+  `section` enum('A','B','C','NA') NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -99,15 +97,14 @@ CREATE TABLE `classes` (
 --
 
 INSERT INTO `classes` (`cls_id`, `name`, `section`, `created_at`) VALUES
-(1, '4', 'A', '2025-08-03 14:16:02'),
-(2, '4', 'B', '2025-08-03 14:16:08'),
-(3, '5', 'A', '2025-08-03 14:16:14'),
-(4, '5', 'B', '2025-08-03 14:16:20'),
-(5, '6', 'A', '2025-08-03 14:16:27'),
-(6, '6', 'B', '2025-08-03 14:16:32'),
-(7, '7', '', '2025-08-03 14:16:36'),
-(8, '8', '', '2025-08-03 14:16:42'),
-(9, '9', '', '2025-08-03 14:16:47');
+(1, '4', 'A', '2025-08-11 11:54:01'),
+(2, '4', 'B', '2025-08-11 11:54:08'),
+(3, '5', 'A', '2025-08-11 11:54:14'),
+(4, '5', 'B', '2025-08-11 11:54:19'),
+(5, '6', 'A', '2025-08-11 11:54:25'),
+(6, '6', 'B', '2025-08-11 11:54:34'),
+(7, '7', 'NA', '2025-08-11 11:54:39'),
+(8, '8', 'NA', '2025-08-11 11:54:42');
 
 -- --------------------------------------------------------
 
@@ -124,13 +121,6 @@ CREATE TABLE `contact_msgs` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `contact_msgs`
---
-
-INSERT INTO `contact_msgs` (`cm_id`, `full_name`, `email`, `subject`, `message`, `created_at`) VALUES
-(1, 'Amit Ghimire', 'amitghimire100@gmail.com', 'Leave letter', 'I am unable to come to school because I am sick.', '2025-08-03 10:38:09');
-
 -- --------------------------------------------------------
 
 --
@@ -143,12 +133,24 @@ CREATE TABLE `leisure_routines` (
   `class_taken_by` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `leisure_routines`
+-- Table structure for table `leisure_teacher`
 --
 
-INSERT INTO `leisure_routines` (`lr_id`, `teacher_id`, `class_taken_by`) VALUES
-(1, 1, 1);
+CREATE TABLE `leisure_teacher` (
+  `le_id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `leisure_teacher`
+--
+
+INSERT INTO `leisure_teacher` (`le_id`, `teacher_id`, `created_at`) VALUES
+(1, 2, '2025-08-12 14:04:40');
 
 -- --------------------------------------------------------
 
@@ -171,7 +173,7 @@ CREATE TABLE `school_details` (
 --
 
 INSERT INTO `school_details` (`sd_id`, `address`, `phone`, `email`, `website`, `opening_hour`, `created_at`) VALUES
-(1, 'Khandbari-9 Tumlingtar, Sankhuwasabha', '०२९-५७५०७२', 'manakamanara2016@gmail.com', 'https://manakamanara.edu.np/', '10:00 to 4:00', '2025-08-03 14:22:11');
+(2, 'Khandbari-9 Tumlingtar, Sankhuwasabha', '9807072190', 'manakamana2016@gmail.com', 'www.manakamanara.edu.np', '10.00 AM - 4.00 PM', '2025-08-12 11:58:49');
 
 -- --------------------------------------------------------
 
@@ -190,16 +192,17 @@ CREATE TABLE `subjects` (
 --
 
 INSERT INTO `subjects` (`subj_id`, `name`, `created_at`) VALUES
-(1, 'Math', '2025-08-03 14:17:07'),
-(2, 'Science', '2025-08-03 14:17:14'),
-(3, 'English', '2025-08-03 14:17:24'),
-(4, 'Nepali', '2025-08-03 14:17:30'),
-(5, 'Social', '2025-08-03 14:17:41'),
-(6, 'Local', '2025-08-03 14:17:55'),
-(7, 'Grammar', '2025-08-03 14:18:08'),
-(8, 'Computer', '2025-08-03 14:18:14'),
-(9, 'G.K.', '2025-08-03 14:18:21'),
-(10, 'O.P.T. Math', '2025-08-03 14:19:24');
+(1, 'MATH', '2025-08-11 11:55:17'),
+(2, 'SCIENCE', '2025-08-11 11:55:27'),
+(3, 'ENGLISH', '2025-08-11 11:55:33'),
+(4, 'NEPALI', '2025-08-11 11:55:38'),
+(6, 'HEALTH', '2025-08-11 11:55:48'),
+(7, 'GRAMMAR', '2025-08-11 11:56:19'),
+(8, 'COMPUTER', '2025-08-11 11:56:26'),
+(9, 'LOCAL', '2025-08-11 11:56:31'),
+(10, 'O.P.T. MATH', '2025-08-11 11:56:39'),
+(11, 'G.K.', '2025-08-11 11:56:45'),
+(12, 'Social', '2025-08-12 15:16:45');
 
 -- --------------------------------------------------------
 
@@ -219,6 +222,7 @@ CREATE TABLE `teachers` (
   `otp` varchar(10) DEFAULT NULL,
   `verified` tinyint(1) DEFAULT 0,
   `level` enum('basic','secondary') DEFAULT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'teacher',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -226,30 +230,25 @@ CREATE TABLE `teachers` (
 -- Dumping data for table `teachers`
 --
 
-INSERT INTO `teachers` (`teach_id`, `username`, `full_name`, `contact`, `email`, `pan`, `photo`, `password`, `otp`, `verified`, `level`, `created_at`) VALUES
-(1, 'amitghimire', 'Amit Ghimire', '9807072190', 'amitghimire100@gmail.com', '123456789', 'Teacher_884.jpg', '$2y$10$18SF3vUNhM9F0DuG9hfPdeALpTb/ZNReOUdnH5LuzHGHdf48h2F4.', NULL, 1, 'secondary', '2025-08-03 12:23:02');
+INSERT INTO `teachers` (`teach_id`, `username`, `full_name`, `contact`, `email`, `pan`, `photo`, `password`, `otp`, `verified`, `level`, `role`, `created_at`) VALUES
+(1, 'admin', 'Admin', '9807072190', 'amitghimire100@gmail.com', '123456789', 'teacher_526.jpg', '$2y$10$Z57XsIjN6A7.A6.way/vtOrZCtucN9qtPm5Q0tXf8BvZ1KR69f4N.', NULL, 1, 'secondary', 'admin', '2025-08-11 13:02:52'),
+(2, 'Amit', 'Amit Ghimire', '9862195577', 'amitghimire102@gmail.com', '12345678', 'teacher_3643.jpg', '$2y$10$Siv7IpoNZrvVcqyfaHdVKe1fQIoHw9tF5nYXgY.UAzB6O3/aFC1lS', NULL, 1, 'secondary', 'teacher', '2025-08-11 13:38:26'),
+(7, 'dai', 'Dai khanal', '9862195577', 'amitghimire10234@gmail.com', '123456', 'teacher_4255.png', '$2y$10$Pp3t75b/HrDjWSmuLFRmDeBO5Vbh3b2Vl4FxtfAMse5oQutXCpxm6', NULL, 1, 'secondary', 'teacher', '2025-08-12 15:23:17');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `academic_routines`
+-- Indexes for table `academic_routine`
 --
-ALTER TABLE `academic_routines`
+ALTER TABLE `academic_routine`
   ADD PRIMARY KEY (`ar_id`),
   ADD KEY `fk_academic_class` (`class_id`),
-  ADD KEY `fk_academic_subject` (`subject_id`),
-  ADD KEY `fk_academic_teacher` (`teacher_id`);
-
---
--- Indexes for table `admins`
---
-ALTER TABLE `admins`
-  ADD PRIMARY KEY (`adm_id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `pan` (`pan`);
+  ADD KEY `fk_academic_subject` (`subject_id1`),
+  ADD KEY `fk_academic_teacher1` (`teacher_id1`),
+  ADD KEY `fk_academic_teacher2` (`teacher_id2`),
+  ADD KEY `fk_academic_subject2` (`subject_id2`);
 
 --
 -- Indexes for table `attendance`
@@ -279,6 +278,13 @@ ALTER TABLE `leisure_routines`
   ADD KEY `fk_leisure_teacher` (`teacher_id`);
 
 --
+-- Indexes for table `leisure_teacher`
+--
+ALTER TABLE `leisure_teacher`
+  ADD PRIMARY KEY (`le_id`),
+  ADD KEY `teacher_id` (`teacher_id`);
+
+--
 -- Indexes for table `school_details`
 --
 ALTER TABLE `school_details`
@@ -305,22 +311,16 @@ ALTER TABLE `teachers`
 --
 
 --
--- AUTO_INCREMENT for table `academic_routines`
+-- AUTO_INCREMENT for table `academic_routine`
 --
-ALTER TABLE `academic_routines`
-  MODIFY `ar_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `admins`
---
-ALTER TABLE `admins`
-  MODIFY `adm_id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `academic_routine`
+  MODIFY `ar_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `att_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `att_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `classes`
@@ -338,37 +338,45 @@ ALTER TABLE `contact_msgs`
 -- AUTO_INCREMENT for table `leisure_routines`
 --
 ALTER TABLE `leisure_routines`
-  MODIFY `lr_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `lr_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `leisure_teacher`
+--
+ALTER TABLE `leisure_teacher`
+  MODIFY `le_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `school_details`
 --
 ALTER TABLE `school_details`
-  MODIFY `sd_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `sd_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `subjects`
 --
 ALTER TABLE `subjects`
-  MODIFY `subj_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `subj_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `teachers`
 --
 ALTER TABLE `teachers`
-  MODIFY `teach_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `teach_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `academic_routines`
+-- Constraints for table `academic_routine`
 --
-ALTER TABLE `academic_routines`
+ALTER TABLE `academic_routine`
   ADD CONSTRAINT `fk_academic_class` FOREIGN KEY (`class_id`) REFERENCES `classes` (`cls_id`),
-  ADD CONSTRAINT `fk_academic_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`subj_id`),
-  ADD CONSTRAINT `fk_academic_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teach_id`);
+  ADD CONSTRAINT `fk_academic_subject` FOREIGN KEY (`subject_id1`) REFERENCES `subjects` (`subj_id`),
+  ADD CONSTRAINT `fk_academic_subject2` FOREIGN KEY (`subject_id2`) REFERENCES `subjects` (`subj_id`),
+  ADD CONSTRAINT `fk_academic_teacher1` FOREIGN KEY (`teacher_id1`) REFERENCES `teachers` (`teach_id`),
+  ADD CONSTRAINT `fk_academic_teacher2` FOREIGN KEY (`teacher_id2`) REFERENCES `teachers` (`teach_id`);
 
 --
 -- Constraints for table `attendance`
@@ -382,6 +390,12 @@ ALTER TABLE `attendance`
 ALTER TABLE `leisure_routines`
   ADD CONSTRAINT `fk_leisure_taken_by_teacher` FOREIGN KEY (`class_taken_by`) REFERENCES `teachers` (`teach_id`),
   ADD CONSTRAINT `fk_leisure_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teach_id`);
+
+--
+-- Constraints for table `leisure_teacher`
+--
+ALTER TABLE `leisure_teacher`
+  ADD CONSTRAINT `leisure_teacher_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teach_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
