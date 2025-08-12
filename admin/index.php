@@ -1,5 +1,7 @@
-<?php include('partial-admin/navbar.php');
-include('partial-admin/login-check.php'); ?>
+<?php 
+include('partial-admin/navbar.php');
+include('partial-admin/login-check.php');
+?>
 
 <style>
     /* Custom style to make carousel images smaller and fit */
@@ -23,8 +25,7 @@ include('partial-admin/login-check.php'); ?>
         color: red;
     }
 
-    /* 
-    .status-leave {
+    /* .status-leave {
         color: blue;
     } */
 </style>
@@ -39,16 +40,19 @@ include('partial-admin/login-check.php'); ?>
         echo $_SESSION['update-attendance'];
         unset($_SESSION['update-attendance']);
     }
+    if (isset($_SESSION['delete-attendance'])) {
+        echo $_SESSION['delete-attendance'];
+        unset($_SESSION['delete-attendance']);
+    }
 
     // Check for an action and ID in the URL
     if (isset($_GET['action']) && isset($_GET['id'])) {
         $action = $_GET['action'];
         $att_id = $_GET['id'];
-
+        
         // Handle the View action
         if ($action == 'view') {
-            // Explicitly qualify both columns in the JOIN ON clause
-            $sql_view_attendance = "SELECT att_id, teachers.full_name, attendance.date, attendance.status, attendance.reason FROM attendance JOIN teachers ON attendance.teacher_id = teacher_id WHERE attendance.att_id = $att_id and role='teacher'";
+            $sql_view_attendance = "SELECT att_id, teachers.full_name, attendance.date, attendance.status, attendance.reason FROM attendance JOIN teachers ON attendance.teacher_id = teachers.teach_id WHERE attendance.att_id = $att_id and teachers.role='teacher'";
             $res_view_attendance = mysqli_query($conn, $sql_view_attendance);
 
             if (mysqli_num_rows($res_view_attendance) == 1) {
@@ -88,89 +92,88 @@ include('partial-admin/login-check.php'); ?>
 
         // Handle the Delete action
         if ($action == 'delete') {
-            // It's a good practice to confirm deletion, but for this example, we proceed.
-            $sql_delete = "DELETE FROM attendance WHERE att_id=$att_id and role='teacher'";
-            if (mysqli_query($conn, $sql_delete)) {
-                $_SESSION['delete-attendance'] = '<div class="alert alert-success">Record deleted successfully.</div>';
+            $sql_check_teacher = "SELECT 1 FROM attendance a JOIN teachers t ON a.teacher_id = t.teach_id WHERE a.att_id = $att_id AND t.role = 'teacher'";
+            $res_check = mysqli_query($conn, $sql_check_teacher);
+        
+            if (mysqli_num_rows($res_check) > 0) {
+                $sql_delete = "DELETE FROM attendance WHERE att_id = $att_id";
+                if (mysqli_query($conn, $sql_delete)) {
+                    $_SESSION['delete-attendance'] = '<div class="alert alert-success">Record deleted successfully.</div>';
+                } else {
+                    $_SESSION['delete-attendance'] = '<div class="alert alert-danger">Error deleting record: ' . mysqli_error($conn) . '</div>';
+                }
             } else {
-                $_SESSION['delete-attendance'] = '<div class="alert alert-danger">Error deleting record: ' . mysqli_error($conn) . '</div>';
+                $_SESSION['delete-attendance'] = '<div class="alert alert-danger">Error: Attendance record not found or does not belong to a teacher.</div>';
             }
-        }
-    }
-
-    // Update form and logic would be complex on the same page. A separate page is highly recommended.
-    // However, if you must, the logic would go here.
-    // Handle the Update action
-    if (isset($_GET['action']) && $_GET['action'] == 'update' && isset($_GET['id'])) {
-        $att_id = $_GET['id'];
-
-        // Check if the form has been submitted
-        if (isset($_POST['update_attendance'])) {
-            // Sanitize and get the new data from the form
-            $new_date = mysqli_real_escape_string($conn, $_POST['date']);
-            $new_status = mysqli_real_escape_string($conn, $_POST['status']);
-            $new_reason = mysqli_real_escape_string($conn, $_POST['reason']);
-
-            // Update the database record
-            $sql_update = "UPDATE attendance SET 
-                         date = '$new_date', 
-                         status = '$new_status', 
-                         reason = '$new_reason' 
-                         WHERE att_id = $att_id";
-
-            if (mysqli_query($conn, $sql_update)) {
-                $_SESSION['update-attendance'] =   '<div class="alert alert-success">Attendance record updated successfully.</div>';
-                header("Location: index.php");
-                exit();
-            } else {
-                $_SESSION['update-attendance'] =   '<div class="alert alert-danger">Error updating record: ' . mysqli_error($conn) . '</div>';
-            }
+            header("Location: index.php");
+            exit();
         }
 
-        // Fetch the existing record to pre-fill the form
-        $sql_get_record = "SELECT * FROM attendance WHERE att_id = $att_id";
-        $res_get_record = mysqli_query($conn, $sql_get_record);
+        // Handle the Update action
+        if ($action == 'update') {
+            $att_id = $_GET['id'];
 
-        if (mysqli_num_rows($res_get_record) == 1) {
-            $record_to_update = mysqli_fetch_assoc($res_get_record);
-            ?>
-            <div class="row my-4">
-                <div class="col-12">
-                    <div class="card p-4 shadow-sm">
-                        <h3 class="fs-4 mb-3">Update Attendance Record</h3>
-                        <form action="index.php?action=update&id=<?php echo $att_id; ?>" method="POST">
-                            <div class="mb-3">
-                                <label for="date" class="form-label">Date</label>
-                                <input type="date" class="form-control" id="date" name="date" value="<?php echo $record_to_update['date']; ?>" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="status" class="form-label">Status</label>
-                                <select class="form-select" id="status" name="status" required>
-                                    <option value="Present" class="status-present" <?php if ($record_to_update['status'] == 'Present') echo 'selected'; ?>>Present</option>
-                                    <option value="Absent" class="status-absent" <?php if ($record_to_update['status'] == 'Absent') echo 'selected'; ?>>Absent</option>
-                                    <!-- <option value="Leave" class="status-leave" <?php if ($record_to_update['status'] == 'Leave') echo 'selected'; ?>>Leave</option> -->
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="reason" class="form-label">Reason (Optional)</label>
-                                <textarea class="form-control" id="reason" name="reason" rows="3"><?php echo $record_to_update['reason']; ?></textarea>
-                            </div>
-                            <button type="submit" name="update_attendance" class="btn btn-primary">Update Record</button>
-                            <a href="index.php" class="btn btn-secondary">Cancel</a>
-                        </form>
+            if (isset($_POST['update_attendance'])) {
+                $new_date = mysqli_real_escape_string($conn, $_POST['date']);
+                $new_status = mysqli_real_escape_string($conn, $_POST['status']);
+                $new_reason = mysqli_real_escape_string($conn, $_POST['reason']);
+
+                $sql_update = "UPDATE attendance SET 
+                                date = '$new_date', 
+                                status = '$new_status', 
+                                reason = '$new_reason' 
+                                WHERE att_id = $att_id";
+
+                if (mysqli_query($conn, $sql_update)) {
+                    $_SESSION['update-attendance'] = '<div class="alert alert-success">Attendance record updated successfully.</div>';
+                    header("Location: index.php");
+                    exit();
+                } else {
+                    $_SESSION['update-attendance'] = '<div class="alert alert-danger">Error updating record: ' . mysqli_error($conn) . '</div>';
+                }
+            }
+
+            $sql_get_record = "SELECT * FROM attendance WHERE att_id = $att_id";
+            $res_get_record = mysqli_query($conn, $sql_get_record);
+
+            if (mysqli_num_rows($res_get_record) == 1) {
+                $record_to_update = mysqli_fetch_assoc($res_get_record);
+                ?>
+                <div class="row my-4">
+                    <div class="col-12">
+                        <div class="card p-4 shadow-sm">
+                            <h3 class="fs-4 mb-3">Update Attendance Record</h3>
+                            <form action="index.php?action=update&id=<?php echo $att_id; ?>" method="POST">
+                                <div class="mb-3">
+                                    <label for="date" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="date" name="date" value="<?php echo $record_to_update['date']; ?>" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="Present" class="status-present" <?php if ($record_to_update['status'] == 'Present') echo 'selected'; ?>>Present</option>
+                                        <option value="Absent" class="status-absent" <?php if ($record_to_update['status'] == 'Absent') echo 'selected'; ?>>Absent</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reason" class="form-label">Reason (Optional)</label>
+                                    <textarea class="form-control" id="reason" name="reason" rows="3"><?php echo $record_to_update['reason']; ?></textarea>
+                                </div>
+                                <button type="submit" name="update_attendance" class="btn btn-primary">Update Record</button>
+                                <a href="index.php" class="btn btn-secondary">Cancel</a>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        <?php
-        } else {
-            echo '<div class="alert alert-danger">Record for updating not found.</div>';
+                <?php
+            } else {
+                echo '<div class="alert alert-danger">Record for updating not found.</div>';
+            }
         }
     }
 
-    // Only display the dashboard content if no specific action is requested
     if (!isset($_GET['action'])) {
         ?>
-
         <div class="row my-4">
             <div class="col-12">
                 <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
@@ -217,7 +220,6 @@ include('partial-admin/login-check.php'); ?>
 
         <div class="row g-3 my-2">
             <?php
-            // Assuming $conn is the database connection
             $sql_teachers = "SELECT COUNT(*) AS total FROM teachers where role='teacher'";
             $res_teachers = mysqli_query($conn, $sql_teachers);
             $count_teachers = mysqli_fetch_assoc($res_teachers)['total'];
@@ -281,47 +283,6 @@ include('partial-admin/login-check.php'); ?>
         </div>
         <hr>
 
-        <!-- <div class="row my-5">
-            <h3 class="fs-4 mb-3">Recent Teachers</h3>
-            <div class="col">
-                <table class="table bg-white rounded shadow-sm table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">S.N.</th>
-                            <th scope="col">Full Name</th>
-                            <th scope="col">Email</th>
-                            <th scope="col">Level</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $sql_recent_teachers = "SELECT full_name, email, level FROM teachers where role='teacher' ORDER BY created_at DESC LIMIT 5";
-                        $res_recent_teachers = mysqli_query($conn, $sql_recent_teachers);
-                        if (mysqli_num_rows($res_recent_teachers) > 0) {
-                            $sn = 1;
-                            while ($row = mysqli_fetch_assoc($res_recent_teachers)) {
-                        ?>
-                                <tr>
-                                    <th scope="row"><?php echo $sn++; ?></th>
-                                    <td><?php echo $row['full_name']; ?></td>
-                                    <td><?php echo $row['email']; ?></td>
-                                    <td><?php echo $row['level']; ?></td>
-                                </tr>
-                            <?php
-                            }
-                        } else {
-                            ?>
-                            <tr>
-                                <td colspan="4">No recent teachers found.</td>
-                            </tr>
-                        <?php
-                        }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-        </div> -->
-
         <div class="row my-1">
             <h3 class="fs-4 mb-3">Recent Attendance</h3>
             <div class="col">
@@ -338,13 +299,12 @@ include('partial-admin/login-check.php'); ?>
                     </thead>
                     <tbody>
                         <?php
-                        $sql_recent_attendance = "SELECT att_id, teachers.full_name, attendance.date, attendance.status, attendance.reason FROM attendance JOIN teachers ON attendance.teacher_id = teacher_id where role='teacher' ORDER BY attendance.recorded_at DESC LIMIT 5";
+                        $sql_recent_attendance = "SELECT att_id, teachers.full_name, attendance.date, attendance.status, attendance.reason FROM attendance JOIN teachers ON attendance.teacher_id = teachers.teach_id where teachers.role='teacher' ORDER BY attendance.recorded_at DESC LIMIT 5";
                         $res_recent_attendance = mysqli_query($conn, $sql_recent_attendance);
 
                         if (mysqli_num_rows($res_recent_attendance) > 0) {
                             $sn = 1;
                             while ($row = mysqli_fetch_assoc($res_recent_attendance)) {
-                                // Determine the CSS class based on the status
                                 $status_class = '';
                                 if ($row['status'] == 'Present') {
                                     $status_class = 'text-success';
@@ -395,15 +355,12 @@ include('partial-admin/login-check.php'); ?>
                     </thead>
                     <tbody>
                         <?php
-                        // Get today's date in 'YYYY-MM-DD' format
                         $today = date('Y-m-d');
-
-                        // Corrected SQL query with parentheses and lowercase status for robustness
                         $sql_absent_leave_teachers = "SELECT teachers.full_name, attendance.status, attendance.reason 
                                                 FROM attendance 
-                                                JOIN teachers ON attendance.teacher_id = teacher_id 
+                                                JOIN teachers ON attendance.teacher_id = teachers.teach_id 
                                                 WHERE teachers.role = 'teacher' 
-                                                AND LOWER(attendance.status) = 'absent' OR LOWER(attendance.status) = 'leave'
+                                                AND (LOWER(attendance.status) = 'absent' OR LOWER(attendance.status) = 'leave')
                                                 AND attendance.date = '$today'";
 
                         $res_absent_leave_teachers = mysqli_query($conn, $sql_absent_leave_teachers);
@@ -440,7 +397,7 @@ include('partial-admin/login-check.php'); ?>
         </div>
 </div>
 <?php
-    } // End of the if(!isset($_GET['action'])) block
+    }
 ?>
 </div>
 

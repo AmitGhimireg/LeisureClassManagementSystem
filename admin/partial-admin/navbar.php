@@ -73,3 +73,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </div>
         </div>
     </nav>
+    <marquee behavior="scroll" direction="left" scrollamount="10">
+        <h3 class="my-0">
+            <i class="bi bi-info-circle-fill"></i>
+            <b class="text-success" style="font-size: 20px;">
+                Welcome to Admin panel of leisure class management system!
+                It is an all-in-one web-site that helps schools easily manage daily leisure class activities, and class routines.
+            </b>
+        </h3>
+    </marquee>

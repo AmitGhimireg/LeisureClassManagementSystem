@@ -9,7 +9,7 @@ if (isset($_POST['add_routine'])) {
     $class_id = mysqli_real_escape_string($conn, $_POST['class_id']);
     $start_time = mysqli_real_escape_string($conn, $_POST['start_time']);
     $end_time = mysqli_real_escape_string($conn, $_POST['end_time']);
-    
+
     // Correctly handle optional fields by setting them to NULL if empty
     $subject_id1 = !empty($_POST['subject_id1']) ? "'" . mysqli_real_escape_string($conn, $_POST['subject_id1']) . "'" : "NULL";
     $subject_id2 = !empty($_POST['subject_id2']) ? "'" . mysqli_real_escape_string($conn, $_POST['subject_id2']) . "'" : "NULL";
@@ -78,10 +78,34 @@ $res_subjects = mysqli_query($conn, $sql_subjects);
 
 $sql_classes = "SELECT cls_id, name, section FROM classes ORDER BY name, section";
 $res_classes = mysqli_query($conn, $sql_classes);
+
+// --- SEARCH LOGIC STARTS HERE ---
+$search_teacher = $_GET['search_teacher'] ?? '';
+$sql = "SELECT ar.*, c.name AS class_name, c.section AS class_section, 
+            s1.name AS subject1_name, s2.name AS subject2_name,
+            t1.full_name AS teacher1_name, t2.full_name AS teacher2_name
+        FROM academic_routine ar
+        LEFT JOIN classes c ON ar.class_id = c.cls_id
+        LEFT JOIN subjects s1 ON ar.subject_id1 = s1.subj_id
+        LEFT JOIN subjects s2 ON ar.subject_id2 = s2.subj_id
+        LEFT JOIN teachers t1 ON ar.teacher_id1 = t1.teach_id
+        LEFT JOIN teachers t2 ON ar.teacher_id2 = t2.teach_id";
+
+if (!empty($search_teacher)) {
+    // Sanitize the search term to prevent SQL injection
+    $sanitized_search_term = mysqli_real_escape_string($conn, $search_teacher);
+    $sql .= " WHERE t1.full_name LIKE '%$sanitized_search_term%' OR t2.full_name LIKE '%$sanitized_search_term%'";
+}
+
+$sql .= " ORDER BY ar.start_time";
+
+$res = mysqli_query($conn, $sql);
+// --- SEARCH LOGIC ENDS HERE ---
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -90,6 +114,7 @@ $res_classes = mysqli_query($conn, $sql_classes);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../css/admin_style.css">
 </head>
+
 <body>
     <div class="d-flex" id="wrapper">
         <div id="page-content-wrapper">
@@ -111,6 +136,23 @@ $res_classes = mysqli_query($conn, $sql_classes);
                             unset($_SESSION['delete_routine']);
                         }
                         ?>
+
+                        <div class="d-flex justify-content-center mb-3">
+                            <form action="" method="GET">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-auto">
+                                        <input type="text" class="form-control" name="search_teacher" placeholder="Search by Teacher Name" value="<?php echo htmlspecialchars($_GET['search_teacher'] ?? ''); ?>">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-secondary">Search</button>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a href="<?php echo SITEURL; ?>admin/routines.php" class="btn btn-outline-secondary">Clear Search</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
                         <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addRoutineModal">
                             <i class="bi bi-calendar-plus"></i> Add New Routine
                         </button>
@@ -133,31 +175,62 @@ $res_classes = mysqli_query($conn, $sql_classes);
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $sql = "SELECT ar.*, c.name AS class_name, c.section AS class_section, 
-                                                s1.name AS subject1_name, s2.name AS subject2_name,
-                                                t1.full_name AS teacher1_name, t2.full_name AS teacher2_name
-                                            FROM academic_routine ar
-                                            LEFT JOIN classes c ON ar.class_id = c.cls_id
-                                            LEFT JOIN subjects s1 ON ar.subject_id1 = s1.subj_id
-                                            LEFT JOIN subjects s2 ON ar.subject_id2 = s2.subj_id
-                                            LEFT JOIN teachers t1 ON ar.teacher_id1 = t1.teach_id
-                                            LEFT JOIN teachers t2 ON ar.teacher_id2 = t2.teach_id
-                                            ORDER BY ar.start_time";
-                                    $res = mysqli_query($conn, $sql);
                                     if (mysqli_num_rows($res) > 0) {
                                         $sn = 1;
+                                        $search_teacher_lower = strtolower($search_teacher);
                                         while ($row = mysqli_fetch_assoc($res)) {
+                                            $teacher1_name_lower = strtolower($row['teacher1_name'] ?? '');
+                                            $teacher2_name_lower = strtolower($row['teacher2_name'] ?? '');
+
+                                            // Conditional display variables
+                                            $subject1_display = '';
+                                            $teacher1_display = '';
+                                            $day_range1_display = '';
+
+                                            $subject2_display = '';
+                                            $teacher2_display = '';
+                                            $day_range2_display = '';
+
+                                            // Determine which data to display based on the search term
+                                            if (!empty($search_teacher)) {
+                                                // Check if the search term matches teacher 1
+                                                if (strpos($teacher1_name_lower, $search_teacher_lower) !== false) {
+                                                    $subject1_display = htmlspecialchars($row['subject1_name'] ?? '');
+                                                    $teacher1_display = htmlspecialchars($row['teacher1_name'] ?? '');
+                                                    $day_range1_display = htmlspecialchars($row['day_range1'] ?? '');
+                                                }
+                                                // Check if the search term matches teacher 2
+                                                if (strpos($teacher2_name_lower, $search_teacher_lower) !== false) {
+                                                    $subject2_display = htmlspecialchars($row['subject2_name'] ?? '');
+                                                    $teacher2_display = htmlspecialchars($row['teacher2_name'] ?? '');
+                                                    $day_range2_display = htmlspecialchars($row['day_range2'] ?? '');
+                                                }
+                                            } else {
+                                                // No search, display all data
+                                                $subject1_display = htmlspecialchars($row['subject1_name'] ?? '');
+                                                $teacher1_display = htmlspecialchars($row['teacher1_name'] ?? '');
+                                                $day_range1_display = htmlspecialchars($row['day_range1'] ?? '');
+
+                                                $subject2_display = htmlspecialchars($row['subject2_name'] ?? '-');
+                                                $teacher2_display = htmlspecialchars($row['teacher2_name'] ?? '-');
+                                                $day_range2_display = htmlspecialchars($row['day_range2'] ?? '-');
+                                            }
+
+                                            // Skip rows that have no matching data after a search
+                                            if (!empty($search_teacher) && empty($teacher1_display) && empty($teacher2_display)) {
+                                                continue;
+                                            }
                                     ?>
                                             <tr>
                                                 <th scope="row"><?php echo $sn++; ?></th>
                                                 <td><?php echo date('h:i A', strtotime($row['start_time'])) . ' - ' . date('h:i A', strtotime($row['end_time'])); ?></td>
-                                                <td><?php echo htmlspecialchars($row['subject1_name'] ?? ''); ?></td>
-                                                <td><?php echo htmlspecialchars($row['subject2_name'] ?? '-'); ?></td>
+                                                <td><?php echo $subject1_display; ?></td>
+                                                <td><?php echo $subject2_display; ?></td>
                                                 <td><?php echo htmlspecialchars($row['class_name'] . ($row['class_section'] ? ' (' . $row['class_section'] . ')' : '')); ?></td>
-                                                <td><?php echo htmlspecialchars($row['teacher1_name'] ?? ''); ?></td>
-                                                <td><?php echo htmlspecialchars($row['teacher2_name'] ?? '-'); ?></td>
-                                                <td><?php echo htmlspecialchars($row['day_range1'] ?? '-'); ?></td>
-                                                <td><?php echo htmlspecialchars($row['day_range2'] ?? '-'); ?></td>
+                                                <td><?php echo $teacher1_display; ?></td>
+                                                <td><?php echo $teacher2_display; ?></td>
+                                                <td><?php echo $day_range1_display; ?></td>
+                                                <td><?php echo $day_range2_display; ?></td>
                                                 <td><?php echo $row['is_break'] == 1 ? 'Yes' : 'No'; ?></td>
                                                 <td>
                                                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#updateRoutineModal-<?php echo $row['ar_id']; ?>">
@@ -271,10 +344,10 @@ $res_classes = mysqli_query($conn, $sql_classes);
                                                     </div>
                                                 </div>
                                             </div>
-                                    <?php
+                                        <?php
                                         }
                                     } else {
-                                    ?>
+                                        ?>
                                         <tr>
                                             <td colspan="11" class="text-center">No routines found.</td>
                                         </tr>
@@ -397,4 +470,5 @@ $res_classes = mysqli_query($conn, $sql_classes);
     include('partial-admin/footer.php');
     ?>
 </body>
+
 </html>

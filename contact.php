@@ -5,7 +5,7 @@ include('partial-front/login-check.php');
 
 
 // Fetch school details from the database
-$sql_school_details = "SELECT * FROM school_details WHERE sd_id = 1";
+$sql_school_details = "SELECT * FROM school_details";
 $res_school_details = mysqli_query($conn, $sql_school_details);
 $school_details = mysqli_fetch_assoc($res_school_details);
 

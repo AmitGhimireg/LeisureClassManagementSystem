@@ -55,7 +55,7 @@ include('partial-front/login-check.php');
         }
         ?>
 
-        <div class="container my-5">
+        <div class="container mt-4">
             <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-indicators">
                     <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
@@ -167,46 +167,39 @@ include('partial-front/login-check.php');
                                 // Get the current date in the correct format for your database (e.g., 'YYYY-MM-DD')
                                 $current_date = date('Y-m-d');
 
-                                // SQL query to fetch the full names of teachers who are marked as 'Absent' for the current date
-                                // We use a JOIN to link the teachers and attendance tables on the teacher_id
-                                // and filter by attendance status and date.
+                                // Corrected SQL query to fetch the full names of teachers who are marked as 'Absent' for the current date
                                 $sql_absent_teachers = "
-                                SELECT t.full_name, t.contact, t.email
-                                FROM teachers AS t
-                                JOIN attendance AS a ON teacher_id = a.teacher_id
+                                SELECT DISTINCT t.full_name, t.contact, t.email
+                                FROM attendance AS a
+                                JOIN teachers AS t ON a.teacher_id = t.teach_id
                                 WHERE a.status = 'Absent' AND t.role='teacher' AND a.date = '$current_date'
-                                GROUP BY t.full_name
-                                AND t.contact
-                                AND t.email
                                 ORDER BY t.full_name ASC
-                            ";
+                                ";
 
                                 $result_absent_teachers = mysqli_query($conn, $sql_absent_teachers);
 
-                                if ($result_absent_teachers) {
-                                    if (mysqli_num_rows($result_absent_teachers) > 0) {
-                                        while ($row = mysqli_fetch_assoc($result_absent_teachers)) {
-                                            $teacher_name = htmlspecialchars($row['full_name']);
-                                            echo "<tr>";
-                                            echo "<td class='text-center'><b>$teacher_name</b></td>";
-                                            echo "<td class='text-center'><b>" . htmlspecialchars($row['contact']) . "<b></td>";
-                                            echo "<td class='text-center'><b>" . htmlspecialchars($row['email']) . "<b></td>";
-                                            echo "</tr>";
-                                        }
-                                    } else {
-                                        echo "<tr>";
-                                        echo "<td class='text-center'>No teachers are absent today.</td>";
-                                        echo "</tr>";
+                                if ($result_absent_teachers && mysqli_num_rows($result_absent_teachers) > 0) {
+                                    while ($row = mysqli_fetch_assoc($result_absent_teachers)) {
+                                        $teacher_name = htmlspecialchars($row['full_name']);
+                                ?>
+                                        <tr>
+                                            <td class="text-center"><b><?php echo $teacher_name; ?></b></td>
+                                            <td class="text-center"><b><?php echo htmlspecialchars($row['contact']); ?></b></td>
+                                            <td class="text-center"><b><?php echo htmlspecialchars($row['email']); ?></b></td>
+                                        </tr>
+                                    <?php
                                     }
                                 } else {
-                                    // Handle query error gracefully
-                                    echo "<tr>";
-                                    echo "<td class='text-center'>Error fetching data: " . mysqli_error($conn) . "</td>";
-                                    echo "</tr>";
+                                    // Properly handle the case where no absent teachers are found
+                                    ?>
+                                    <tr>
+                                        <td colspan="3" class="text-center">No teachers are absent today.</td>
+                                    </tr>
+                                <?php
                                 }
 
-                                // Close the database connection
-                                $conn->close();
+                                // We will not close the connection here.
+                                // It should be closed once all database operations are complete, usually in the footer.
                                 ?>
                             </tbody>
                         </table>

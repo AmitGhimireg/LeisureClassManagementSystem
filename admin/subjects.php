@@ -1,4 +1,4 @@
-<?php include('partial-admin/navbar.php'); 
+<?php include('partial-admin/navbar.php');
 include('partial-admin/login-check.php');?>
 <?php
 $page_title = "Manage Subjects";
@@ -77,6 +77,23 @@ if (isset($_GET['delete_id'])) {
                             unset($_SESSION['delete_subject']);
                         }
                         ?>
+                        
+                        <div class="d-flex justify-content-center mb-3">
+                            <form action="" method="GET">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-auto">
+                                        <input type="text" class="form-control" name="search" placeholder="Search Subject Name" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-secondary">Search</button>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a href="<?php echo SITEURL; ?>admin/subjects.php" class="btn btn-outline-secondary">Clear Search</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        
                         <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
                            <i class="bi bi-journal-plus"></i> Add New Subject
                         </button>
@@ -91,7 +108,14 @@ if (isset($_GET['delete_id'])) {
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $sql = "SELECT * FROM subjects ORDER BY name";
+                                    $search_term = $_GET['search'] ?? '';
+                                    $sql = "SELECT * FROM subjects";
+                                    if (!empty($search_term)) {
+                                        $sanitized_search_term = mysqli_real_escape_string($conn, $search_term);
+                                        $sql .= " WHERE name LIKE '%$sanitized_search_term%'";
+                                    }
+                                    $sql .= " ORDER BY name";
+
                                     $res = mysqli_query($conn, $sql);
                                     if (mysqli_num_rows($res) > 0) {
                                         $sn = 1;
@@ -99,7 +123,7 @@ if (isset($_GET['delete_id'])) {
                                     ?>
                                             <tr>
                                                 <th scope="row"><?php echo $sn++; ?></th>
-                                                <td><?php echo $row['name']; ?></td>
+                                                <td><?php echo htmlspecialchars($row['name']); ?></td>
                                                 <td>
                                                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#updateSubjectModal-<?php echo $row['subj_id']; ?>">
                                                         <i class="bi bi-pencil"></i>
@@ -121,7 +145,7 @@ if (isset($_GET['delete_id'])) {
                                                                 <input type="hidden" name="subj_id" value="<?php echo $row['subj_id']; ?>">
                                                                 <div class="mb-3">
                                                                     <label for="name" class="form-label">Subject Name</label>
-                                                                    <input type="text" class="form-control" name="name" value="<?php echo $row['name']; ?>" required>
+                                                                    <input type="text" class="form-control" name="name" value="<?php echo htmlspecialchars($row['name']); ?>" required>
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">

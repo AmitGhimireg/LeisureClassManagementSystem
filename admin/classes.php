@@ -1,6 +1,6 @@
-<?php include('partial-admin/navbar.php'); 
-include('partial-admin/login-check.php');?>
-<?php
+<?php include('partial-admin/navbar.php');
+include('partial-admin/login-check.php');
+
 $page_title = "Manage Classes";
 
 // Handle form submissions
@@ -79,6 +79,23 @@ if (isset($_GET['delete_id'])) {
                             unset($_SESSION['delete_class']);
                         }
                         ?>
+                        
+                        <div class="d-flex justify-content-center mb-3">
+                            <form action="" method="GET">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-auto">
+                                        <input type="text" class="form-control" name="search" placeholder="Search Class or Section" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="submit" class="btn btn-secondary">Search</button>
+                                    </div>
+                                    <div class="col-auto">
+                                        <a href="<?php echo SITEURL; ?>admin/classes.php" class="btn btn-outline-secondary">Clear Search</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        
                         <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addClassModal">
                             <i class="bi bi-folder-plus"> </i> Add New Class
                         </button>
@@ -94,7 +111,14 @@ if (isset($_GET['delete_id'])) {
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $sql = "SELECT * FROM classes ORDER BY name, section";
+                                    $search_term = $_GET['search'] ?? '';
+                                    $sql = "SELECT * FROM classes";
+                                    if (!empty($search_term)) {
+                                        $sanitized_search_term = mysqli_real_escape_string($conn, $search_term);
+                                        $sql .= " WHERE name LIKE '%$sanitized_search_term%' OR section LIKE '%$sanitized_search_term%'";
+                                    }
+                                    $sql .= " ORDER BY name, section";
+                                    
                                     $res = mysqli_query($conn, $sql);
                                     if (mysqli_num_rows($res) > 0) {
                                         $sn = 1;
@@ -102,8 +126,8 @@ if (isset($_GET['delete_id'])) {
                                     ?>
                                             <tr>
                                                 <th scope="row"><?php echo $sn++; ?></th>
-                                                <td><?php echo $row['name']; ?></td>
-                                                <td><?php echo $row['section']; ?></td>
+                                                <td><?php echo htmlspecialchars($row['name']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['section']); ?></td>
                                                 <td>
                                                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#updateClassModal-<?php echo $row['cls_id']; ?>">
                                                         <i class="bi bi-pencil"></i>
@@ -125,12 +149,12 @@ if (isset($_GET['delete_id'])) {
                                                                 <input type="hidden" name="cls_id" value="<?php echo $row['cls_id']; ?>">
                                                                 <div class="mb-3">
                                                                     <label for="name" class="form-label">Class Name</label>
-                                                                    <input type="text" class="form-control" name="name" value="<?php echo $row['name']; ?>" required>
+                                                                    <input type="text" class="form-control" name="name" value="<?php echo htmlspecialchars($row['name']); ?>" required>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label for="section" class="form-label">Section</label>
                                                                     <select class="form-select" name="section" required>
-                                                                        <option value="A" <?php if ($row['section'] == 'NA') echo 'selected'; ?>>NA</option>
+                                                                        <option value="NA" <?php if ($row['section'] == 'NA') echo 'selected'; ?>>NA</option>
                                                                         <option value="A" <?php if ($row['section'] == 'A') echo 'selected'; ?>>A</option>
                                                                         <option value="B" <?php if ($row['section'] == 'B') echo 'selected'; ?>>B</option>
                                                                         <option value="C" <?php if ($row['section'] == 'C') echo 'selected'; ?>>C</option>

@@ -21,7 +21,7 @@ $is_logged_in = isset($_SESSION['teach_id']) && isset($_SESSION['username']);
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="index.php"> 
+            <a class="navbar-brand" href="index.php">
                 <i class="bi bi-mortarboard-fill me-2"> </i> M.R.A.S.S. </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -46,7 +46,7 @@ $is_logged_in = isset($_SESSION['teach_id']) && isset($_SESSION['username']);
                                 <i class="bi bi-person-circle"></i> <?php echo htmlspecialchars($_SESSION['username']); ?>
                             </a>
                         </li>
-                    <!-- <?php else: ?>
+                        <!-- <?php else: ?>
                         <li class="nav-item">
                             <a class="nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'login.php') ? 'active' : ''; ?>" href="login.php">LOGIN</a>
                         </li>
@@ -58,6 +58,19 @@ $is_logged_in = isset($_SESSION['teach_id']) && isset($_SESSION['username']);
             </div>
         </div>
     </nav>
+    
+    <marquee behavior="scroll" direction="left" scrollamount="10">
+        <h3 class="my-0">
+            <i class="bi bi-info-circle-fill"></i>
+            <b class="text-success" style="font-size: 20px;">
+                Welcome to Teacher panel of leisure class management system! 
+                It is an all-in-one web-site that helps schools easily manage daily leisure class activities, and class routines.
+            </b>
+        </h3>
+    </marquee>
+
+
+
 </body>
 
 </html>
