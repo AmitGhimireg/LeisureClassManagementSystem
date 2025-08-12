@@ -3,18 +3,11 @@
 // Include necessary files.
 include('partial-front/navbar.php');
 include('partial-front/login-check.php');
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Project</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="css/style.css">
     <style>
         .carousel-item img {
             max-height: 400px;
@@ -37,6 +30,19 @@ include('partial-front/login-check.php');
             transform: translateY(-5px);
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
         }
+
+        .small-time-header {
+            font-size: 0.8rem;
+            white-space: nowrap;
+            padding-left: 0.3rem;
+            padding-right: 0.3rem;
+        }
+
+        .leisure-table td,
+        .leisure-table th {
+            padding: 0.4rem;
+            vertical-align: middle;
+        }
     </style>
 </head>
 
@@ -48,17 +54,6 @@ include('partial-front/login-check.php');
             unset($_SESSION['login']);
         }
         ?>
-        <div class="container mt-4">
-            <h2 class="text-center mb-4">Search Teachers From Here</h2>
-            <div class="row justify-content-center mb-5">
-                <div class="col-md-8">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search teachers by name..." aria-label="Search" id="searchInput">
-                        <button class="btn btn-primary" type="button" id="searchButton">Search</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="container my-5">
             <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
@@ -102,12 +97,24 @@ include('partial-front/login-check.php');
         </div>
 
         <div class="container mt-4">
+            <h2 class="text-center mb-4">Search Teachers From Here</h2>
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search teachers by name..." aria-label="Search" id="searchInput">
+                        <button class="btn btn-primary" type="button" id="searchButton">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mt-4">
             <h2 class="text-center mb-4" id="teachersHeading">Our Teachers</h2>
 
             <div class="row" id="teachersList">
                 <?php
-                // SQL query to fetch only the first 4 teachers with the role 'teacher'
-                $sql = "SELECT * FROM teachers WHERE role = 'teacher' LIMIT 4";
+                // SQL query to fetch all teachers from the database for the initial page load
+                $sql = "SELECT * FROM teachers WHERE role = 'teacher'";
                 $res = mysqli_query($conn, $sql);
 
                 if (mysqli_num_rows($res) > 0) {
@@ -121,20 +128,14 @@ include('partial-front/login-check.php');
                         $teacher_pan = $row['pan'];
                 ?>
                         <div class="col-md-6 col-lg-4 mb-4 teacher-search-item" data-id="<?php echo $teacher_id; ?>" data-name="<?php echo $teacher_name; ?>" data-level="<?php echo $teacher_level; ?>" data-contact="<?php echo $teacher_contact; ?>" data-email="<?php echo $teacher_email; ?>" data-pan="<?php echo $teacher_pan; ?>" data-photo="<?php echo $teacher_photo; ?>">
-                            <div class="card h-100 text-center teacher-card">
+                            <div class="card h-100 text-center">
                                 <div class="card-body">
-                                    <?php
-                                    // Check if photo is set and exists, otherwise use a placeholder
-                                    if ($teacher_photo && file_exists('images/teachers/' . $teacher_photo)) {
-                                        $image_path = SITEURL . 'images/teachers/' . $teacher_photo;
-                                    } else {
-                                        $image_path = 'https://via.placeholder.com/150';
-                                    }
-                                    ?>
-                                    <img src="<?php echo $image_path; ?>" class="img-fluid rounded-circle mb-3" alt="<?php echo $teacher_name; ?>" style="width: 150px; height: 150px; object-fit: cover;">
-                                    <h5 class="card-title teacher-name-click" style="cursor: pointer;"><?php echo $teacher_name; ?></h5>
-                                    <p class="card-text"><strong>Level:</strong> <?php echo $teacher_level; ?></p>
-                                    <p class="card-text"><strong>Contact:</strong> <?php echo $teacher_contact; ?></p>
+                                    <img src="<?php echo SITEURL; ?>images/teachers/<?php echo $teacher_photo; ?>" class="img-fluid rounded-circle mb-3" alt="<?php echo $teacher_name; ?>" style="width: 150px; height: 150px; object-fit: cover;">
+                                    <b>
+                                        <h5 class="card-title teacher-name-click" style="cursor: pointer;"><?php echo $teacher_name; ?></h5>
+                                        <p class="card-text"><strong>Level:</strong> <?php echo $teacher_level; ?></p>
+                                        <p class="card-text"><strong>Contact:</strong> <?php echo $teacher_contact; ?></p>
+                                    </b>
                                 </div>
                             </div>
                         </div>
@@ -145,69 +146,78 @@ include('partial-front/login-check.php');
                 }
                 ?>
             </div>
-            <div class="text-center mt-3">
-                <a href="teachers.php" class="btn btn-primary">Browse All Teachers</a>
-            </div>
         </div>
 
-        <div class="container mt-5">
-            <h2 class="text-center mb-4" id="leisureRoutineHeading">Leisure Teachers</h2>
+        <div class="container mt-4">
+            <h2 class="text-center mb-4" id="substituteHeading">Absent Teachers</h2>
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover table-striped leisure-table">
+                        <table class="table table-bordered table-hover table-striped">
                             <thead>
                                 <tr>
-                                    <th scope="col" class="text-center"><b>S.N.</b></th>
-                                    <th scope="col" class="text-center"><b>Image</b></th>
-                                    <th scope="col" class="text-center"><b>Teacher Name</b></th>
-                                    <th scope="col" class="text-center"><b>Contact Number</b></th>
-                                    <th scope="col" class="text-center"><b>Email</b></th>
+                                    <th scope="col" class="text-center">Absent Teacher Name</th>
+                                    <th scope="col" class="text-center">Mobile Number</th>
+                                    <th scope="col" class="text-center">Email</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                $sql_leisure = "SELECT t.full_name AS teacher_name, t.contact AS teacher_contact, t.email AS teacher_email, t.photo AS teacher_photo
-                                                FROM leisure_routines lr
-                                                LEFT JOIN teachers t ON lr.teacher_id = t.teach_id";
-                                $result_leisure = mysqli_query($conn, $sql_leisure);
-                                $sn = 1; // Initialize a counter for the serial number
 
-                                if ($result_leisure && mysqli_num_rows($result_leisure) > 0) {
-                                    while ($row = mysqli_fetch_assoc($result_leisure)) {
-                                        $teacher_name = $row['teacher_name'] ?? 'N/A';
-                                        $teacher_contact = $row['teacher_contact'] ?? 'N/A';
-                                        $teacher_email = $row['teacher_email'] ?? 'N/A';
-                                        $teacher_photo = $row['teacher_photo'] ?? 'N/A';
-                                        echo '<tr>';
-                                        echo '<td class="text-center"><b>' . $sn++ . '</b></td>'; // Display and increment S.N.
-                                        echo '<td class="text-center">';
-                                        // Check if photo is set and exists, otherwise use a placeholder
-                                        if ($teacher_photo && file_exists('images/teachers/' . $teacher_photo)) {
-                                            $image_path_leisure = SITEURL . 'images/teachers/' . $teacher_photo;
-                                        } else {
-                                            $image_path_leisure = 'https://via.placeholder.com/50';
+                                // Get the current date in the correct format for your database (e.g., 'YYYY-MM-DD')
+                                $current_date = date('Y-m-d');
+
+                                // SQL query to fetch the full names of teachers who are marked as 'Absent' for the current date
+                                // We use a JOIN to link the teachers and attendance tables on the teacher_id
+                                // and filter by attendance status and date.
+                                $sql_absent_teachers = "
+                                SELECT t.full_name, t.contact, t.email
+                                FROM teachers AS t
+                                JOIN attendance AS a ON teacher_id = a.teacher_id
+                                WHERE a.status = 'Absent' AND t.role='teacher' AND a.date = '$current_date'
+                                GROUP BY t.full_name
+                                AND t.contact
+                                AND t.email
+                                ORDER BY t.full_name ASC
+                            ";
+
+                                $result_absent_teachers = mysqli_query($conn, $sql_absent_teachers);
+
+                                if ($result_absent_teachers) {
+                                    if (mysqli_num_rows($result_absent_teachers) > 0) {
+                                        while ($row = mysqli_fetch_assoc($result_absent_teachers)) {
+                                            $teacher_name = htmlspecialchars($row['full_name']);
+                                            echo "<tr>";
+                                            echo "<td class='text-center'><b>$teacher_name</b></td>";
+                                            echo "<td class='text-center'><b>" . htmlspecialchars($row['contact']) . "<b></td>";
+                                            echo "<td class='text-center'><b>" . htmlspecialchars($row['email']) . "<b></td>";
+                                            echo "</tr>";
                                         }
-                                        echo '<img src="' . $image_path_leisure . '" alt="' . htmlspecialchars($teacher_name) . '" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">';
-                                        echo '</td>';
-                                        echo '<td class="text-center"><b>' . htmlspecialchars($teacher_name) . '</b></td>';
-                                        echo '<td class="text-center"><b>' . htmlspecialchars($teacher_contact) . '</b></td>';
-                                        echo '<td class="text-center"><b>' . htmlspecialchars($teacher_email) . '</b></td>';
-                                        echo '</tr>';
+                                    } else {
+                                        echo "<tr>";
+                                        echo "<td class='text-center'>No teachers are absent today.</td>";
+                                        echo "</tr>";
                                     }
                                 } else {
-                                    echo '<tr><td colspan="5" class="text-center">No leisure teachers found.</td></tr>'; // Adjusted colspan
+                                    // Handle query error gracefully
+                                    echo "<tr>";
+                                    echo "<td class='text-center'>Error fetching data: " . mysqli_error($conn) . "</td>";
+                                    echo "</tr>";
                                 }
+
+                                // Close the database connection
+                                $conn->close();
                                 ?>
                             </tbody>
                         </table>
                     </div>
+                    <p class="text-muted mt-3 text-center">
+                        This table lists the teachers who are absent today.
+                    </p>
                 </div>
             </div>
-            <div class="text-center mt-3">
-                <a href="routine.php" class="btn btn-primary">Browse All Leisure Classes</a>
-            </div>
         </div>
+
     </div>
 
     <div class="modal fade" id="teacherDetailsModal" tabindex="-1" aria-labelledby="teacherDetailsModalLabel" aria-hidden="true">
@@ -220,10 +230,12 @@ include('partial-front/login-check.php');
                 <div class="modal-body text-center">
                     <img id="modalTeacherPhoto" src="" class="img-fluid rounded-circle mb-3" alt="" style="width: 150px; height: 150px; object-fit: cover;">
                     <h4 id="modalTeacherName"></h4>
-                    <p><strong>Level:</strong> <span id="modalTeacherLevel"></span></p>
-                    <p><strong>Contact:</strong> <span id="modalTeacherContact"></span></p>
-                    <p><strong>Email:</strong> <span id="modalTeacherEmail"></span></p>
-                    <p><strong>PAN:</strong> <span id="modalTeacherPan"></span></p>
+                    <b>
+                        <p><strong>Level:</strong> <span id="modalTeacherLevel"></span></p>
+                        <p><strong>Contact:</strong> <span id="modalTeacherContact"></span></p>
+                        <p><strong>Email:</strong> <span id="modalTeacherEmail"></span></p>
+                        <p><strong>PAN:</strong> <span id="modalTeacherPan"></span></p>
+                    </b>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

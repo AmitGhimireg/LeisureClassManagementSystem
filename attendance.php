@@ -71,7 +71,6 @@ if (isset($_POST['submit'])) {
                                     <option value="">Select Status</option>
                                     <option value="Present">Present</option>
                                     <option value="Absent">Absent</option>
-                                    <option value="Leave">On Leave</option>
                                 </select>
                             </div>
                             <div class="mb-3">

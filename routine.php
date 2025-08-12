@@ -9,21 +9,22 @@
 include('partial-front/navbar.php');
 include('partial-front/login-check.php');
 
-// Check if the database connection was successful
-if (!isset($conn) || $conn->connect_error) {
-    die("Database connection failed: " . ($conn->connect_error ?? "Connection variable not set."));
-}
 
 // --- ROUTINE VARIABLES ---
 // Define the fixed period times
 $main_period_times = [
-    '10:15-11:00 AM', '11:00-11:45 AM', '11:45-12:30 PM', '12:30-01:15 PM',
-    '01:15-02:00 PM', '02:00-02:40 PM', '02:40-03:20 PM', '03:20-04:00 PM'
+    '10:15-11:00 AM',
+    '11:00-11:45 AM',
+    '11:45-12:30 PM',
+    '12:30-01:15 PM',
+    '01:15-02:00 PM',
+    '02:00-02:40 PM',
+    '02:40-03:20 PM',
+    '03:20-04:00 PM'
 ];
 
 // Set the current day and date based on the current system time
-$day_to_fetch = date('l'); 
-$date_to_fetch = date('Y-m-d'); 
+$date_to_fetch = date('Y-m-d');
 
 // A more robust way to handle period times for comparison
 $period_time_ranges = [];
@@ -37,20 +38,33 @@ foreach ($main_period_times as $time_slot) {
 
 // --- FETCH ACADEMIC ROUTINE DATA ---
 $academic_routines_data = [];
-$sql_academic = "SELECT c.name AS class_name, c.section, ar.start_time, ar.end_time, s.name AS subject_name, t.full_name AS teacher_name, ar.is_break
-             FROM academic_routines ar
-             JOIN classes c ON ar.class_id = c.cls_id
-             LEFT JOIN subjects s ON ar.subject_id = s.subj_id
-             LEFT JOIN teachers t ON ar.teacher_id = t.teach_id
-             WHERE ar.day = '$day_to_fetch'
-             ORDER BY c.name, c.section, ar.start_time";
+$sql_academic = "SELECT 
+                    c.name AS class_name, 
+                    c.section, 
+                    ar.start_time, 
+                    ar.end_time, 
+                    s1.name AS subject1_name, 
+                    s2.name AS subject2_name, 
+                    t1.full_name AS teacher1_name, 
+                    t2.full_name AS teacher2_name,
+                    ar.day_range1,
+                    ar.day_range2,
+                    ar.is_break
+                FROM academic_routine ar
+                JOIN classes c ON ar.class_id = c.cls_id
+                LEFT JOIN subjects s1 ON ar.subject_id1 = s1.subj_id
+                LEFT JOIN subjects s2 ON ar.subject_id2 = s2.subj_id
+                LEFT JOIN teachers t1 ON ar.teacher_id1 = t1.teach_id
+                LEFT JOIN teachers t2 ON ar.teacher_id2 = t2.teach_id
+                ORDER BY c.name, c.section, ar.start_time";
+
 $result_academic = $conn->query($sql_academic);
 
 if ($result_academic) {
     while ($row = $result_academic->fetch_assoc()) {
         $class_label = $row['class_name'] . (empty($row['section']) ? '' : ' (' . $row['section'] . ')');
-        
-        $db_start_time = date('H:i:s', strtotime($row['start_time'])); 
+
+        $db_start_time = date('H:i:s', strtotime($row['start_time']));
         $period_index = null;
 
         foreach ($period_time_ranges as $index => $range) {
@@ -60,20 +74,22 @@ if ($result_academic) {
                 break;
             }
         }
-        
+
         if ($period_index !== null) {
             if (!isset($academic_routines_data[$class_label])) {
-                $academic_routines_data[$class_label] = array_fill(0, count($main_period_times), ['subject' => '', 'teacher_name' => '', 'is_break' => 0]);
+                $academic_routines_data[$class_label] = array_fill(0, count($main_period_times), [
+                    'subject1' => '', 'subject2' => '', 'teacher1' => '', 'teacher2' => '', 'is_break' => 0, 'day_range1' => '', 'day_range2' => ''
+                ]);
             }
-            
-            $subject = $row['subject_name'] ?? '';
-            $teacher_name = $row['teacher_name'] ?? '';
-            $is_break = $row['is_break'] ?? 0;
-            
+
             $academic_routines_data[$class_label][$period_index] = [
-                'subject' => $subject,
-                'teacher_name' => $teacher_name,
-                'is_break' => $is_break
+                'subject1' => $row['subject1_name'] ?? '',
+                'subject2' => $row['subject2_name'] ?? '',
+                'teacher1' => $row['teacher1_name'] ?? '',
+                'teacher2' => $row['teacher2_name'] ?? '',
+                'is_break' => $row['is_break'] ?? 0,
+                'day_range1' => $row['day_range1'] ?? '',
+                'day_range2' => $row['day_range2'] ?? ''
             ];
         }
     }
@@ -103,23 +119,27 @@ if (!empty($absent_teacher_ids)) {
                             t.full_name AS teacher_name,
                             ar.start_time,
                             ar.end_time,
-                            s.name AS subject_name,
+                            s1.name AS subject1_name,
+                            s2.name AS subject2_name,
                             c.name AS class_name,
                             c.section,
+                            ar.day_range1,
+                            ar.day_range2,
                             ar.is_break
-                        FROM academic_routines ar
-                        JOIN teachers t ON ar.teacher_id = t.teach_id
-                        LEFT JOIN subjects s ON ar.subject_id = s.subj_id
+                        FROM academic_routine ar
+                        JOIN teachers t ON ar.teacher_id1 = t.teach_id OR ar.teacher_id2 = t.teach_id
+                        LEFT JOIN subjects s1 ON ar.subject_id1 = s1.subj_id
+                        LEFT JOIN subjects s2 ON ar.subject_id2 = s2.subj_id
                         LEFT JOIN classes c ON ar.class_id = c.cls_id
-                        WHERE ar.day = '$day_to_fetch'
-                        AND ar.teacher_id IN ($absent_teachers_str)
+                        WHERE (ar.teacher_id1 IN ($absent_teachers_str) OR ar.teacher_id2 IN ($absent_teachers_str))
                         ORDER BY t.full_name, ar.start_time";
+
     $result_substitute = $conn->query($sql_substitute);
 
     if ($result_substitute) {
         while ($row = $result_substitute->fetch_assoc()) {
             $teacher_name = $row['teacher_name'];
-            
+
             $db_start_time = date('H:i:s', strtotime($row['start_time']));
             $period_index = null;
 
@@ -133,18 +153,21 @@ if (!empty($absent_teacher_ids)) {
 
             if ($period_index !== null) {
                 if (!isset($substitute_schedule[$teacher_name])) {
-                    $substitute_schedule[$teacher_name] = array_fill(0, count($main_period_times), ['activity' => '', 'class' => '', 'is_break' => 0]);
-                    $absent_teachers_list[] = $teacher_name; 
+                    $substitute_schedule[$teacher_name] = array_fill(0, count($main_period_times), [
+                        'subject1' => '', 'subject2' => '', 'class' => '', 'is_break' => 0, 'day_range1' => '', 'day_range2' => ''
+                    ]);
+                    $absent_teachers_list[] = $teacher_name;
                 }
-                
-                $activity = $row['subject_name'] ?? '';
+
                 $class = empty($row['class_name']) ? '' : $row['class_name'] . (empty($row['section']) ? '' : ' (' . $row['section'] . ')');
-                $is_break = $row['is_break'] ?? 0;
                 
                 $substitute_schedule[$teacher_name][$period_index] = [
-                    'activity' => $activity,
+                    'subject1' => $row['subject1_name'] ?? '',
+                    'subject2' => $row['subject2_name'] ?? '',
                     'class' => $class,
-                    'is_break' => $is_break
+                    'is_break' => $row['is_break'] ?? 0,
+                    'day_range1' => $row['day_range1'] ?? '',
+                    'day_range2' => $row['day_range2'] ?? ''
                 ];
             }
         }
@@ -158,7 +181,6 @@ $conn->close();
 <div class="main-content">
     <div class="container mt-4">
         <h2 class="text-center mb-4">Yearly Class Routine</h2>
-        <h3 class="text-center mb-4">Today: <?php echo htmlspecialchars(date('F j, Y', strtotime($date_to_fetch))) . ' (' . htmlspecialchars($day_to_fetch) . ')'; ?></h3>
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <div class="table-responsive">
@@ -176,27 +198,50 @@ $conn->close();
                         <tbody>
                             <?php if (empty($academic_routines_data)) : ?>
                                 <tr>
-                                    <td colspan="<?php echo count($main_period_times) + 1; ?>" class="text-center">No academic routine found for <?php echo htmlspecialchars($day_to_fetch); ?>.</td>
+                                    <td colspan="<?php echo count($main_period_times) + 1; ?>" class="text-center">No academic routine found.</td>
                                 </tr>
                             <?php else : ?>
                                 <?php foreach ($academic_routines_data as $class_label => $routine_periods) : ?>
                                     <tr>
                                         <th scope="row" class="text-center"><?php echo htmlspecialchars($class_label); ?></th>
-                                        <?php foreach ($routine_periods as $index => $period_info) : ?>
+                                        <?php foreach ($routine_periods as $period_info) : ?>
                                             <?php
-                                            $subject = $period_info['subject'];
-                                            $teacher_name = $period_info['teacher_name'];
+                                            $subject1 = $period_info['subject1'];
+                                            $subject2 = $period_info['subject2'];
+                                            $teacher1 = $period_info['teacher1'];
+                                            $teacher2 = $period_info['teacher2'];
                                             $is_break = $period_info['is_break'];
+                                            $day_range1 = $period_info['day_range1'];
+                                            $day_range2 = $period_info['day_range2'];
                                             $cell_content = '';
                                             $cell_class = '';
 
                                             if ($is_break == 1) {
                                                 $cell_content = 'BREAK';
                                                 $cell_class = 'table-warning fw-bold text-center';
-                                            } else if (!empty($subject)) {
-                                                $cell_content = htmlspecialchars($subject);
-                                                if (!empty($teacher_name)) {
-                                                    $cell_content .= '<br><small>' . htmlspecialchars($teacher_name) . '</small>';
+                                            } else {
+                                                $subjects = [];
+                                                if (!empty($subject1)) $subjects[] = $subject1;
+                                                if (!empty($subject2)) $subjects[] = $subject2;
+                                                
+                                                if (!empty($subjects)) {
+                                                    $cell_content .= '<strong>' . implode(' / ', array_map('htmlspecialchars', $subjects)) . '</strong>';
+                                                }
+
+                                                $teachers = [];
+                                                if (!empty($teacher1)) $teachers[] = $teacher1;
+                                                if (!empty($teacher2)) $teachers[] = $teacher2;
+
+                                                if (!empty($teachers)) {
+                                                    $cell_content .= '<br><small>' . implode(' / ', array_map('htmlspecialchars', $teachers)) . '</small>';
+                                                }
+
+                                                $day_ranges = [];
+                                                if (!empty($day_range1)) $day_ranges[] = $day_range1;
+                                                if (!empty($day_range2)) $day_ranges[] = $day_range2;
+
+                                                if (!empty($day_ranges)) {
+                                                    $cell_content .= '<br><small class="text-muted">Day: ' . implode(' / ', array_map('htmlspecialchars', $day_ranges)) . '</small>';
                                                 }
                                             }
                                             ?>
@@ -240,23 +285,42 @@ $conn->close();
                                     <tr>
                                         <th scope="row" class="text-start"><?php echo htmlspecialchars($teacher_name); ?></th>
                                         <?php
-                                        foreach ($substitute_schedule[$teacher_name] as $index => $period_info) {
-                                            $activity = $period_info['activity'];
+                                        foreach ($substitute_schedule[$teacher_name] as $period_info) {
+                                            $subject1 = $period_info['subject1'];
+                                            $subject2 = $period_info['subject2'];
                                             $class = $period_info['class'];
                                             $is_break = $period_info['is_break'];
+                                            $day_range1 = $period_info['day_range1'];
+                                            $day_range2 = $period_info['day_range2'];
+                                            
                                             $cell_content = '';
                                             $cell_class = '';
 
                                             if ($is_break == 1) {
                                                 $cell_class = 'table-warning fw-bold';
                                                 $cell_content = 'BREAK';
-                                            } else if (!empty($activity)) {
-                                                $cell_content = htmlspecialchars($activity);
+                                            } else {
+                                                $subjects = [];
+                                                if (!empty($subject1)) $subjects[] = $subject1;
+                                                if (!empty($subject2)) $subjects[] = $subject2;
+                                                
+                                                if (!empty($subjects)) {
+                                                    $cell_content .= '<strong>' . implode(' / ', array_map('htmlspecialchars', $subjects)) . '</strong>';
+                                                }
+
                                                 if (!empty($class)) {
                                                     $cell_content .= '<br><small>' . htmlspecialchars($class) . '</small>';
                                                 }
-                                            }
+                                                
+                                                $day_ranges = [];
+                                                if (!empty($day_range1)) $day_ranges[] = $day_range1;
+                                                if (!empty($day_range2)) $day_ranges[] = $day_range2;
 
+                                                if (!empty($day_ranges)) {
+                                                    $cell_content .= '<br><small class="text-muted">Day: ' . implode(' / ', array_map('htmlspecialchars', $day_ranges)) . '</small>';
+                                                }
+                                            }
+                                            
                                             echo '<td class="text-center ' . htmlspecialchars($cell_class) . '">';
                                             echo !empty($cell_content) ? $cell_content : '-';
                                             echo '</td>';
@@ -283,14 +347,18 @@ $conn->close();
         padding-left: 0.3rem;
         padding-right: 0.3rem;
     }
-    .table td, .table th {
+
+    .table td,
+    .table th {
         padding: 0.4rem;
         vertical-align: middle;
     }
+
     .table-responsive {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
+
     .table td small {
         font-size: 0.75rem;
         white-space: nowrap;

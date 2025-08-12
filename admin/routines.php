@@ -1,25 +1,31 @@
-<?php include('partial-admin/navbar.php'); 
-include('partial-admin/login-check.php');?>
 <?php
+include('partial-admin/navbar.php');
+include('partial-admin/login-check.php');
+
 $page_title = "Manage Routines";
 
-// Handle form submissions
+// Handle form submissions for adding, updating, and deleting routines
 if (isset($_POST['add_routine'])) {
-    $day = mysqli_real_escape_string($conn, $_POST['day']);
+    $class_id = mysqli_real_escape_string($conn, $_POST['class_id']);
     $start_time = mysqli_real_escape_string($conn, $_POST['start_time']);
     $end_time = mysqli_real_escape_string($conn, $_POST['end_time']);
-    $subject_id = mysqli_real_escape_string($conn, $_POST['subject_id']);
-    $class_id = mysqli_real_escape_string($conn, $_POST['class_id']);
-    $teacher_id = mysqli_real_escape_string($conn, $_POST['teacher_id']);
+    
+    // Correctly handle optional fields by setting them to NULL if empty
+    $subject_id1 = !empty($_POST['subject_id1']) ? "'" . mysqli_real_escape_string($conn, $_POST['subject_id1']) . "'" : "NULL";
+    $subject_id2 = !empty($_POST['subject_id2']) ? "'" . mysqli_real_escape_string($conn, $_POST['subject_id2']) . "'" : "NULL";
+    $teacher_id1 = !empty($_POST['teacher_id1']) ? "'" . mysqli_real_escape_string($conn, $_POST['teacher_id1']) . "'" : "NULL";
+    $teacher_id2 = !empty($_POST['teacher_id2']) ? "'" . mysqli_real_escape_string($conn, $_POST['teacher_id2']) . "'" : "NULL";
+    $day_range1 = !empty($_POST['day_range1']) ? "'" . mysqli_real_escape_string($conn, $_POST['day_range1']) . "'" : "NULL";
+    $day_range2 = !empty($_POST['day_range2']) ? "'" . mysqli_real_escape_string($conn, $_POST['day_range2']) . "'" : "NULL";
     $is_break = isset($_POST['is_break']) ? '1' : '0';
 
-    $sql = "INSERT INTO academic_routines (day, start_time, end_time, subject_id, is_break, class_id, teacher_id) 
-            VALUES ('$day', '$start_time', '$end_time', '$subject_id', '$is_break', '$class_id', '$teacher_id')";
+    $sql = "INSERT INTO academic_routine (class_id, start_time, end_time, subject_id1, subject_id2, teacher_id1, teacher_id2, day_range1, day_range2, is_break) 
+            VALUES ('$class_id', '$start_time', '$end_time', $subject_id1, $subject_id2, $teacher_id1, $teacher_id2, $day_range1, $day_range2, '$is_break')";
 
     if (mysqli_query($conn, $sql)) {
         $_SESSION['add_routine'] = "<div class='alert alert-success'>Routine Added Successfully.</div>";
     } else {
-        $_SESSION['add_routine'] = "<div class='alert alert-danger'>Failed to Add Routine.</div>";
+        $_SESSION['add_routine'] = "<div class='alert alert-danger'>Failed to Add Routine: " . mysqli_error($conn) . "</div>";
     }
     header('location:' . SITEURL . 'admin/routines.php');
     exit();
@@ -27,20 +33,25 @@ if (isset($_POST['add_routine'])) {
 
 if (isset($_POST['update_routine'])) {
     $ar_id = $_POST['ar_id'];
-    $day = mysqli_real_escape_string($conn, $_POST['day']);
+    $class_id = mysqli_real_escape_string($conn, $_POST['class_id']);
     $start_time = mysqli_real_escape_string($conn, $_POST['start_time']);
     $end_time = mysqli_real_escape_string($conn, $_POST['end_time']);
-    $subject_id = mysqli_real_escape_string($conn, $_POST['subject_id']);
-    $class_id = mysqli_real_escape_string($conn, $_POST['class_id']);
-    $teacher_id = mysqli_real_escape_string($conn, $_POST['teacher_id']);
+
+    // Correctly handle optional fields by setting them to NULL if empty
+    $subject_id1 = !empty($_POST['subject_id1']) ? "'" . mysqli_real_escape_string($conn, $_POST['subject_id1']) . "'" : "NULL";
+    $subject_id2 = !empty($_POST['subject_id2']) ? "'" . mysqli_real_escape_string($conn, $_POST['subject_id2']) . "'" : "NULL";
+    $teacher_id1 = !empty($_POST['teacher_id1']) ? "'" . mysqli_real_escape_string($conn, $_POST['teacher_id1']) . "'" : "NULL";
+    $teacher_id2 = !empty($_POST['teacher_id2']) ? "'" . mysqli_real_escape_string($conn, $_POST['teacher_id2']) . "'" : "NULL";
+    $day_range1 = !empty($_POST['day_range1']) ? "'" . mysqli_real_escape_string($conn, $_POST['day_range1']) . "'" : "NULL";
+    $day_range2 = !empty($_POST['day_range2']) ? "'" . mysqli_real_escape_string($conn, $_POST['day_range2']) . "'" : "NULL";
     $is_break = isset($_POST['is_break']) ? '1' : '0';
 
-    $sql = "UPDATE academic_routines SET day='$day', start_time='$start_time', end_time='$end_time', subject_id='$subject_id', is_break='$is_break', class_id='$class_id', teacher_id='$teacher_id' WHERE ar_id=$ar_id";
+    $sql = "UPDATE academic_routine SET class_id='$class_id', start_time='$start_time', end_time='$end_time', subject_id1=$subject_id1, subject_id2=$subject_id2, teacher_id1=$teacher_id1, teacher_id2=$teacher_id2, day_range1=$day_range1, day_range2=$day_range2, is_break='$is_break' WHERE ar_id=$ar_id";
 
     if (mysqli_query($conn, $sql)) {
         $_SESSION['update_routine'] = "<div class='alert alert-success'>Routine Updated Successfully.</div>";
     } else {
-        $_SESSION['update_routine'] = "<div class='alert alert-danger'>Failed to Update Routine.</div>";
+        $_SESSION['update_routine'] = "<div class='alert alert-danger'>Failed to Update Routine: " . mysqli_error($conn) . "</div>";
     }
     header('location:' . SITEURL . 'admin/routines.php');
     exit();
@@ -48,11 +59,11 @@ if (isset($_POST['update_routine'])) {
 
 if (isset($_GET['delete_id'])) {
     $ar_id = $_GET['delete_id'];
-    $sql = "DELETE FROM academic_routines WHERE ar_id=$ar_id";
+    $sql = "DELETE FROM academic_routine WHERE ar_id=$ar_id";
     if (mysqli_query($conn, $sql)) {
         $_SESSION['delete_routine'] = "<div class='alert alert-success'>Routine Deleted Successfully.</div>";
     } else {
-        $_SESSION['delete_routine'] = "<div class='alert alert-danger'>Failed to Delete Routine.</div>";
+        $_SESSION['delete_routine'] = "<div class='alert alert-danger'>Failed to Delete Routine: " . mysqli_error($conn) . "</div>";
     }
     header('location:' . SITEURL . 'admin/routines.php');
     exit();
@@ -71,7 +82,6 @@ $res_classes = mysqli_query($conn, $sql_classes);
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,7 +90,6 @@ $res_classes = mysqli_query($conn, $sql_classes);
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../css/admin_style.css">
 </head>
-
 <body>
     <div class="d-flex" id="wrapper">
         <div id="page-content-wrapper">
@@ -110,23 +119,30 @@ $res_classes = mysqli_query($conn, $sql_classes);
                                 <thead>
                                     <tr>
                                         <th scope="col">S.N.</th>
-                                        <th scope="col">Day</th>
                                         <th scope="col">Time</th>
-                                        <th scope="col">Subject</th>
+                                        <th scope="col">Subject 1</th>
+                                        <th scope="col">Subject 2</th>
                                         <th scope="col">Class</th>
-                                        <th scope="col">Teacher</th>
+                                        <th scope="col">Teacher 1</th>
+                                        <th scope="col">Teacher 2</th>
+                                        <th scope="col">Day Range 1</th>
+                                        <th scope="col">Day Range 2</th>
                                         <th scope="col">Is Break?</th>
                                         <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
-                                    $sql = "SELECT ar.*, s.name as subject_name, c.name as class_name, c.section as class_section, t.full_name as teacher_name
-                                            FROM academic_routines ar
-                                            JOIN subjects s ON ar.subject_id = s.subj_id
-                                            JOIN classes c ON ar.class_id = c.cls_id
-                                            JOIN teachers t ON ar.teacher_id = t.teach_id
-                                            ORDER BY ar.day, ar.start_time";
+                                    $sql = "SELECT ar.*, c.name AS class_name, c.section AS class_section, 
+                                                s1.name AS subject1_name, s2.name AS subject2_name,
+                                                t1.full_name AS teacher1_name, t2.full_name AS teacher2_name
+                                            FROM academic_routine ar
+                                            LEFT JOIN classes c ON ar.class_id = c.cls_id
+                                            LEFT JOIN subjects s1 ON ar.subject_id1 = s1.subj_id
+                                            LEFT JOIN subjects s2 ON ar.subject_id2 = s2.subj_id
+                                            LEFT JOIN teachers t1 ON ar.teacher_id1 = t1.teach_id
+                                            LEFT JOIN teachers t2 ON ar.teacher_id2 = t2.teach_id
+                                            ORDER BY ar.start_time";
                                     $res = mysqli_query($conn, $sql);
                                     if (mysqli_num_rows($res) > 0) {
                                         $sn = 1;
@@ -134,11 +150,14 @@ $res_classes = mysqli_query($conn, $sql_classes);
                                     ?>
                                             <tr>
                                                 <th scope="row"><?php echo $sn++; ?></th>
-                                                <td><?php echo $row['day']; ?></td>
                                                 <td><?php echo date('h:i A', strtotime($row['start_time'])) . ' - ' . date('h:i A', strtotime($row['end_time'])); ?></td>
-                                                <td><?php echo $row['subject_name']; ?></td>
-                                                <td><?php echo $row['class_name'] . ($row['class_section'] ? '-' . $row['class_section'] : ''); ?></td>
-                                                <td><?php echo $row['teacher_name']; ?></td>
+                                                <td><?php echo htmlspecialchars($row['subject1_name'] ?? ''); ?></td>
+                                                <td><?php echo htmlspecialchars($row['subject2_name'] ?? '-'); ?></td>
+                                                <td><?php echo htmlspecialchars($row['class_name'] . ($row['class_section'] ? ' (' . $row['class_section'] . ')' : '')); ?></td>
+                                                <td><?php echo htmlspecialchars($row['teacher1_name'] ?? ''); ?></td>
+                                                <td><?php echo htmlspecialchars($row['teacher2_name'] ?? '-'); ?></td>
+                                                <td><?php echo htmlspecialchars($row['day_range1'] ?? '-'); ?></td>
+                                                <td><?php echo htmlspecialchars($row['day_range2'] ?? '-'); ?></td>
                                                 <td><?php echo $row['is_break'] == 1 ? 'Yes' : 'No'; ?></td>
                                                 <td>
                                                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#updateRoutineModal-<?php echo $row['ar_id']; ?>">
@@ -160,59 +179,84 @@ $res_classes = mysqli_query($conn, $sql_classes);
                                                             <div class="modal-body">
                                                                 <input type="hidden" name="ar_id" value="<?php echo $row['ar_id']; ?>">
                                                                 <div class="mb-3">
-                                                                    <label for="day" class="form-label">Day</label>
-                                                                    <select class="form-select" name="day" required>
-                                                                        <option value="Sunday" <?php if ($row['day'] == 'Sunday') echo 'selected'; ?>>Sunday</option>
-                                                                        <option value="Monday" <?php if ($row['day'] == 'Monday') echo 'selected'; ?>>Monday</option>
-                                                                        <option value="Tuesday" <?php if ($row['day'] == 'Tuesday') echo 'selected'; ?>>Tuesday</option>
-                                                                        <option value="Wednesday" <?php if ($row['day'] == 'Wednesday') echo 'selected'; ?>>Wednesday</option>
-                                                                        <option value="Thursday" <?php if ($row['day'] == 'Thursday') echo 'selected'; ?>>Thursday</option>
-                                                                        <option value="Friday" <?php if ($row['day'] == 'Friday') echo 'selected'; ?>>Friday</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label for="start_time" class="form-label">Start Time</label>
-                                                                    <input type="time" class="form-control" name="start_time" value="<?php echo $row['start_time']; ?>" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label for="end_time" class="form-label">End Time</label>
-                                                                    <input type="time" class="form-control" name="end_time" value="<?php echo $row['end_time']; ?>" required>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label for="subject_id" class="form-label">Subject</label>
-                                                                    <select class="form-select" name="subject_id" required>
-                                                                        <?php
-                                                                        $res_subjects_update = mysqli_query($conn, $sql_subjects);
-                                                                        while ($subj = mysqli_fetch_assoc($res_subjects_update)) {
-                                                                            $selected = ($subj['subj_id'] == $row['subject_id']) ? 'selected' : '';
-                                                                            echo "<option value='{$subj['subj_id']}' {$selected}>{$subj['name']}</option>";
-                                                                        }
-                                                                        ?>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="mb-3">
                                                                     <label for="class_id" class="form-label">Class</label>
                                                                     <select class="form-select" name="class_id" required>
                                                                         <?php
                                                                         $res_classes_update = mysqli_query($conn, $sql_classes);
                                                                         while ($cls = mysqli_fetch_assoc($res_classes_update)) {
                                                                             $selected = ($cls['cls_id'] == $row['class_id']) ? 'selected' : '';
-                                                                            echo "<option value='{$cls['cls_id']}' {$selected}>{$cls['name']}" . ($cls['section'] ? '-' . $cls['section'] : '') . "</option>";
+                                                                            echo "<option value='{$cls['cls_id']}' {$selected}>{$cls['name']}" . ($cls['section'] ? ' (' . $cls['section'] . ')' : '') . "</option>";
                                                                         }
                                                                         ?>
                                                                     </select>
                                                                 </div>
                                                                 <div class="mb-3">
-                                                                    <label for="teacher_id" class="form-label">Teacher</label>
-                                                                    <select class="form-select" name="teacher_id" required>
+                                                                    <label for="start_time" class="form-label">Start Time</label>
+                                                                    <input type="time" class="form-control" name="start_time" value="<?php echo $row['start_time']; ?>">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="end_time" class="form-label">End Time</label>
+                                                                    <input type="time" class="form-control" name="end_time" value="<?php echo $row['end_time']; ?>">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="subject_id1" class="form-label">Subject 1</label>
+                                                                    <select class="form-select" name="subject_id1">
+                                                                        <option value="">-- Select Subject 1 --</option>
+                                                                        <?php
+                                                                        $res_subjects_update = mysqli_query($conn, $sql_subjects);
+                                                                        while ($subj = mysqli_fetch_assoc($res_subjects_update)) {
+                                                                            $selected = ($subj['subj_id'] == $row['subject_id1']) ? 'selected' : '';
+                                                                            echo "<option value='{$subj['subj_id']}' {$selected}>{$subj['name']}</option>";
+                                                                        }
+                                                                        ?>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="subject_id2" class="form-label">Subject 2 (Optional)</label>
+                                                                    <select class="form-select" name="subject_id2">
+                                                                        <option value="">-- Select Subject 2 --</option>
+                                                                        <?php
+                                                                        $res_subjects_update_2 = mysqli_query($conn, $sql_subjects);
+                                                                        while ($subj = mysqli_fetch_assoc($res_subjects_update_2)) {
+                                                                            $selected = ($subj['subj_id'] == $row['subject_id2']) ? 'selected' : '';
+                                                                            echo "<option value='{$subj['subj_id']}' {$selected}>{$subj['name']}</option>";
+                                                                        }
+                                                                        ?>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="teacher_id1" class="form-label">Teacher 1</label>
+                                                                    <select class="form-select" name="teacher_id1">
+                                                                        <option value="">-- Select Teacher 1 --</option>
                                                                         <?php
                                                                         $res_teachers_update = mysqli_query($conn, $sql_teachers);
                                                                         while ($teach = mysqli_fetch_assoc($res_teachers_update)) {
-                                                                            $selected = ($teach['teach_id'] == $row['teacher_id']) ? 'selected' : '';
+                                                                            $selected = ($teach['teach_id'] == $row['teacher_id1']) ? 'selected' : '';
                                                                             echo "<option value='{$teach['teach_id']}' {$selected}>{$teach['full_name']}</option>";
                                                                         }
                                                                         ?>
                                                                     </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="teacher_id2" class="form-label">Teacher 2 (Optional)</label>
+                                                                    <select class="form-select" name="teacher_id2">
+                                                                        <option value="">-- Select Teacher 2 --</option>
+                                                                        <?php
+                                                                        $res_teachers_update_2 = mysqli_query($conn, $sql_teachers);
+                                                                        while ($teach = mysqli_fetch_assoc($res_teachers_update_2)) {
+                                                                            $selected = ($teach['teach_id'] == $row['teacher_id2']) ? 'selected' : '';
+                                                                            echo "<option value='{$teach['teach_id']}' {$selected}>{$teach['full_name']}</option>";
+                                                                        }
+                                                                        ?>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="day_range1" class="form-label">Day Range 1</label>
+                                                                    <input type="text" class="form-control" name="day_range1" value="<?php echo htmlspecialchars($row['day_range1'] ?? ''); ?>" placeholder="e.g., 1-3, 1-4, 1-6">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="day_range2" class="form-label">Day Range 2 (Optional)</label>
+                                                                    <input type="text" class="form-control" name="day_range2" value="<?php echo htmlspecialchars($row['day_range2'] ?? ''); ?>" placeholder="e.g., 1-3, 1-4, 1-6">
                                                                 </div>
                                                                 <div class="form-check">
                                                                     <input class="form-check-input" type="checkbox" name="is_break" value="1" id="is_break_<?php echo $row['ar_id']; ?>" <?php if ($row['is_break'] == 1) echo 'checked'; ?>>
@@ -227,12 +271,12 @@ $res_classes = mysqli_query($conn, $sql_classes);
                                                     </div>
                                                 </div>
                                             </div>
-                                        <?php
+                                    <?php
                                         }
                                     } else {
-                                        ?>
+                                    ?>
                                         <tr>
-                                            <td colspan="8" class="text-center">No routines found.</td>
+                                            <td colspan="11" class="text-center">No routines found.</td>
                                         </tr>
                                     <?php
                                     }
@@ -256,27 +300,29 @@ $res_classes = mysqli_query($conn, $sql_classes);
                 <form action="" method="POST">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="day" class="form-label">Day</label>
-                            <select class="form-select" name="day" required>
-                                <option value="Sunday">Sunday</option>
-                                <option value="Monday">Monday</option>
-                                <option value="Tuesday">Tuesday</option>
-                                <option value="Wednesday">Wednesday</option>
-                                <option value="Thursday">Thursday</option>
-                                <option value="Friday">Friday</option>
+                            <label for="class_id" class="form-label">Class</label>
+                            <select class="form-select" name="class_id" required>
+                                <option value="">-- Select Class --</option>
+                                <?php
+                                $res_classes_add = mysqli_query($conn, $sql_classes);
+                                while ($cls = mysqli_fetch_assoc($res_classes_add)) {
+                                    echo "<option value='{$cls['cls_id']}'>{$cls['name']}" . ($cls['section'] ? ' (' . $cls['section'] . ')' : '') . "</option>";
+                                }
+                                ?>
                             </select>
                         </div>
                         <div class="mb-3">
                             <label for="start_time" class="form-label">Start Time</label>
-                            <input type="time" class="form-control" name="start_time" required>
+                            <input type="time" class="form-control" name="start_time">
                         </div>
                         <div class="mb-3">
                             <label for="end_time" class="form-label">End Time</label>
-                            <input type="time" class="form-control" name="end_time" required>
+                            <input type="time" class="form-control" name="end_time">
                         </div>
                         <div class="mb-3">
-                            <label for="subject_id" class="form-label">Subject</label>
-                            <select class="form-select" name="subject_id" required>
+                            <label for="subject_id1" class="form-label">Subject 1</label>
+                            <select class="form-select" name="subject_id1">
+                                <option value="">-- Select Subject 1 --</option>
                                 <?php
                                 $res_subjects_add = mysqli_query($conn, $sql_subjects);
                                 while ($subj = mysqli_fetch_assoc($res_subjects_add)) {
@@ -286,19 +332,21 @@ $res_classes = mysqli_query($conn, $sql_classes);
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="class_id" class="form-label">Class</label>
-                            <select class="form-select" name="class_id" required>
+                            <label for="subject_id2" class="form-label">Subject 2 (Optional)</label>
+                            <select class="form-select" name="subject_id2">
+                                <option value="">-- Select Subject 2 --</option>
                                 <?php
-                                $res_classes_add = mysqli_query($conn, $sql_classes);
-                                while ($cls = mysqli_fetch_assoc($res_classes_add)) {
-                                    echo "<option value='{$cls['cls_id']}'>{$cls['name']}" . ($cls['section'] ? '-' . $cls['section'] : '') . "</option>";
+                                $res_subjects_add_2 = mysqli_query($conn, $sql_subjects);
+                                while ($subj = mysqli_fetch_assoc($res_subjects_add_2)) {
+                                    echo "<option value='{$subj['subj_id']}'>{$subj['name']}</option>";
                                 }
                                 ?>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="teacher_id" class="form-label">Teacher</label>
-                            <select class="form-select" name="teacher_id" required>
+                            <label for="teacher_id1" class="form-label">Teacher 1</label>
+                            <select class="form-select" name="teacher_id1">
+                                <option value="">-- Select Teacher 1 --</option>
                                 <?php
                                 $res_teachers_add = mysqli_query($conn, $sql_teachers);
                                 while ($teach = mysqli_fetch_assoc($res_teachers_add)) {
@@ -306,6 +354,26 @@ $res_classes = mysqli_query($conn, $sql_classes);
                                 }
                                 ?>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="teacher_id2" class="form-label">Teacher 2 (Optional)</label>
+                            <select class="form-select" name="teacher_id2">
+                                <option value="">-- Select Teacher 2 --</option>
+                                <?php
+                                $res_teachers_add_2 = mysqli_query($conn, $sql_teachers);
+                                while ($teach = mysqli_fetch_assoc($res_teachers_add_2)) {
+                                    echo "<option value='{$teach['teach_id']}'>{$teach['full_name']}</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="day_range1" class="form-label">Day Range 1</label>
+                            <input type="text" class="form-control" name="day_range1" placeholder="e.g., 1-3, 1-4, 1-6">
+                        </div>
+                        <div class="mb-3">
+                            <label for="day_range2" class="form-label">Day Range 2 (Optional)</label>
+                            <input type="text" class="form-control" name="day_range2" placeholder="e.g., 1-3, 1-4, 1-6">
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="is_break" value="1" id="is_break">
@@ -329,5 +397,4 @@ $res_classes = mysqli_query($conn, $sql_classes);
     include('partial-admin/footer.php');
     ?>
 </body>
-
 </html>
