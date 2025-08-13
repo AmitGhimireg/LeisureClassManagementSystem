@@ -15,7 +15,7 @@ $is_logged_in = isset($_SESSION['teach_id']) && isset($_SESSION['username']);
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="images/logo.jpg" type="image/jpeg">
 </head>
 
 <body>
