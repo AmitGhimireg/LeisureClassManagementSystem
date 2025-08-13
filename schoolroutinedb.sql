@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 13, 2025 at 12:53 PM
+-- Generation Time: Aug 13, 2025 at 06:21 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -38,23 +38,22 @@ CREATE TABLE `academic_routine` (
   `teacher_id2` int(11) DEFAULT NULL,
   `day_range1` enum('1-3','4-6','1-6') DEFAULT NULL,
   `day_range2` enum('1-3','4-6','1-6') DEFAULT NULL,
-  `is_break` enum('0','1') NOT NULL DEFAULT '0',
-  `is_leisure` enum('0','1') DEFAULT NULL
+  `is_break` enum('0','1') NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `academic_routine`
 --
 
-INSERT INTO `academic_routine` (`ar_id`, `class_id`, `start_time`, `end_time`, `subject_id1`, `subject_id2`, `teacher_id1`, `teacher_id2`, `day_range1`, `day_range2`, `is_break`, `is_leisure`) VALUES
-(1, 1, '10:15:00', '11:00:00', 3, NULL, 2, NULL, '1-6', NULL, '0', NULL),
-(2, 1, '11:00:00', '11:45:00', 2, NULL, 2, NULL, '1-6', NULL, '0', NULL),
-(3, 1, '11:45:00', '12:30:00', 4, NULL, 2, NULL, '1-6', NULL, '0', NULL),
-(4, 1, '12:30:00', '13:15:00', 1, NULL, 2, NULL, '1-6', NULL, '0', NULL),
-(5, 1, '13:15:00', '14:00:00', NULL, NULL, NULL, NULL, NULL, NULL, '1', NULL),
-(9, 1, '14:00:00', '14:40:00', 9, 8, 7, 2, '1-3', '4-6', '0', NULL),
-(10, 1, '14:40:00', '15:20:00', 7, NULL, 7, NULL, '1-6', NULL, '0', NULL),
-(11, 1, '15:20:00', '16:00:00', 10, 12, 2, 7, '1-3', '4-6', '0', NULL);
+INSERT INTO `academic_routine` (`ar_id`, `class_id`, `start_time`, `end_time`, `subject_id1`, `subject_id2`, `teacher_id1`, `teacher_id2`, `day_range1`, `day_range2`, `is_break`) VALUES
+(1, 1, '10:15:00', '11:00:00', 3, NULL, 2, NULL, '1-6', NULL, '0'),
+(2, 1, '11:00:00', '11:45:00', 2, NULL, 2, NULL, '1-6', NULL, '0'),
+(3, 1, '11:45:00', '12:30:00', 4, NULL, 2, NULL, '1-6', NULL, '0'),
+(4, 1, '12:30:00', '13:15:00', 1, NULL, 2, NULL, '1-6', NULL, '0'),
+(5, 1, '13:15:00', '14:00:00', NULL, NULL, NULL, NULL, NULL, NULL, '1'),
+(9, 1, '14:00:00', '14:40:00', 9, 8, 7, 2, '1-3', '4-6', '0'),
+(10, 1, '14:40:00', '15:20:00', 7, NULL, 7, NULL, '1-6', NULL, '0'),
+(11, 1, '15:20:00', '16:00:00', 10, 12, 2, 7, '1-3', '4-6', '0');
 
 -- --------------------------------------------------------
 
@@ -147,8 +146,10 @@ CREATE TABLE `leisure_routines` (
 --
 
 CREATE TABLE `leisure_teacher` (
-  `le_id` int(11) NOT NULL,
+  `lt_id` int(11) NOT NULL,
   `teacher_id` int(11) NOT NULL,
+  `st_time` time DEFAULT NULL,
+  `ed_time` time DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -156,8 +157,9 @@ CREATE TABLE `leisure_teacher` (
 -- Dumping data for table `leisure_teacher`
 --
 
-INSERT INTO `leisure_teacher` (`le_id`, `teacher_id`, `created_at`) VALUES
-(1, 2, '2025-08-12 14:04:40');
+INSERT INTO `leisure_teacher` (`lt_id`, `teacher_id`, `st_time`, `ed_time`, `created_at`) VALUES
+(1, 2, '10:15:00', '11:00:00', '2025-08-13 15:27:30'),
+(4, 7, '10:15:00', '11:00:00', '2025-08-13 15:39:36');
 
 -- --------------------------------------------------------
 
@@ -288,8 +290,8 @@ ALTER TABLE `leisure_routines`
 -- Indexes for table `leisure_teacher`
 --
 ALTER TABLE `leisure_teacher`
-  ADD PRIMARY KEY (`le_id`),
-  ADD KEY `teacher_id` (`teacher_id`);
+  ADD PRIMARY KEY (`lt_id`),
+  ADD KEY `leisure_teacher` (`teacher_id`);
 
 --
 -- Indexes for table `school_details`
@@ -351,7 +353,7 @@ ALTER TABLE `leisure_routines`
 -- AUTO_INCREMENT for table `leisure_teacher`
 --
 ALTER TABLE `leisure_teacher`
-  MODIFY `le_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `lt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `school_details`
@@ -402,7 +404,7 @@ ALTER TABLE `leisure_routines`
 -- Constraints for table `leisure_teacher`
 --
 ALTER TABLE `leisure_teacher`
-  ADD CONSTRAINT `leisure_teacher_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teach_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `leisure_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`teach_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
