@@ -64,7 +64,8 @@ if (isset($_GET['delete_id'])) {
             <div class="container-fluid px-4">
                 <div class="row my-4">
                     <div class="col-12">
-                        <h3 class="fs-4 mb-3"><?php echo $page_title; ?></h3>
+                        <div class="card p-4 shadow-sm">
+                        <h3 class="fs-4 mb-5 text-center"><b><?php echo $page_title; ?></b></h3>
                         <?php
                         if (isset($_SESSION['add_class'])) {
                             echo $_SESSION['add_class'];
@@ -79,7 +80,7 @@ if (isset($_GET['delete_id'])) {
                             unset($_SESSION['delete_class']);
                         }
                         ?>
-                        
+
                         <div class="d-flex justify-content-center mb-3">
                             <form action="" method="GET">
                                 <div class="row g-2 align-items-center">
@@ -95,7 +96,7 @@ if (isset($_GET['delete_id'])) {
                                 </div>
                             </form>
                         </div>
-                        
+
                         <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addClassModal">
                             <i class="bi bi-folder-plus"> </i> Add New Class
                         </button>
@@ -118,7 +119,7 @@ if (isset($_GET['delete_id'])) {
                                         $sql .= " WHERE name LIKE '%$sanitized_search_term%' OR section LIKE '%$sanitized_search_term%'";
                                     }
                                     $sql .= " ORDER BY name, section";
-                                    
+
                                     $res = mysqli_query($conn, $sql);
                                     if (mysqli_num_rows($res) > 0) {
                                         $sn = 1;
@@ -227,6 +228,9 @@ if (isset($_GET['delete_id'])) {
     <?php
     include('partial-admin/footer.php');
     ?>
+    </div>
+
+
 </body>
 
 </html>

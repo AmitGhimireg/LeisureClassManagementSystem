@@ -1,4 +1,4 @@
-<?php 
+<?php
 include('partial-admin/navbar.php');
 include('partial-admin/login-check.php');
 ?>
@@ -49,7 +49,7 @@ include('partial-admin/login-check.php');
     if (isset($_GET['action']) && isset($_GET['id'])) {
         $action = $_GET['action'];
         $att_id = $_GET['id'];
-        
+
         // Handle the View action
         if ($action == 'view') {
             $sql_view_attendance = "SELECT att_id, teachers.full_name, attendance.date, attendance.status, attendance.reason FROM attendance JOIN teachers ON attendance.teacher_id = teachers.teach_id WHERE attendance.att_id = $att_id and teachers.role='teacher'";
@@ -94,7 +94,7 @@ include('partial-admin/login-check.php');
         if ($action == 'delete') {
             $sql_check_teacher = "SELECT 1 FROM attendance a JOIN teachers t ON a.teacher_id = t.teach_id WHERE a.att_id = $att_id AND t.role = 'teacher'";
             $res_check = mysqli_query($conn, $sql_check_teacher);
-        
+
             if (mysqli_num_rows($res_check) > 0) {
                 $sql_delete = "DELETE FROM attendance WHERE att_id = $att_id";
                 if (mysqli_query($conn, $sql_delete)) {
@@ -138,7 +138,7 @@ include('partial-admin/login-check.php');
 
             if (mysqli_num_rows($res_get_record) == 1) {
                 $record_to_update = mysqli_fetch_assoc($res_get_record);
-                ?>
+            ?>
                 <div class="row my-4">
                     <div class="col-12">
                         <div class="card p-4 shadow-sm">
@@ -165,7 +165,7 @@ include('partial-admin/login-check.php');
                         </div>
                     </div>
                 </div>
-                <?php
+        <?php
             } else {
                 echo '<div class="alert alert-danger">Record for updating not found.</div>';
             }
@@ -299,12 +299,21 @@ include('partial-admin/login-check.php');
                     </thead>
                     <tbody>
                         <?php
-                        $sql_recent_attendance = "SELECT att_id, teachers.full_name, attendance.date, attendance.status, attendance.reason FROM attendance JOIN teachers ON attendance.teacher_id = teachers.teach_id where teachers.role='teacher' ORDER BY attendance.recorded_at DESC LIMIT 5";
-                        $res_recent_attendance = mysqli_query($conn, $sql_recent_attendance);
+                        // Get today's date in 'YYYY-MM-DD' format
+                        $today = date('Y-m-d');
 
-                        if (mysqli_num_rows($res_recent_attendance) > 0) {
+                        // SQL query to select attendance records for today's date
+                        $sql_today_attendance = "SELECT att_id, teachers.full_name, attendance.date, attendance.status, attendance.reason 
+                                        FROM attendance 
+                                        JOIN teachers ON attendance.teacher_id = teachers.teach_id 
+                                        WHERE teachers.role='teacher' AND attendance.date = '$today'
+                                        ORDER BY attendance.recorded_at DESC";
+
+                        $res_today_attendance = mysqli_query($conn, $sql_today_attendance);
+
+                        if (mysqli_num_rows($res_today_attendance) > 0) {
                             $sn = 1;
-                            while ($row = mysqli_fetch_assoc($res_recent_attendance)) {
+                            while ($row = mysqli_fetch_assoc($res_today_attendance)) {
                                 $status_class = '';
                                 if ($row['status'] == 'Present') {
                                     $status_class = 'text-success';
@@ -331,7 +340,7 @@ include('partial-admin/login-check.php');
                         } else {
                             ?>
                             <tr>
-                                <td colspan="6">No recent attendance records found.</td>
+                                <td colspan="6">No attendance records found for today.</td>
                             </tr>
                         <?php
                         }
@@ -339,8 +348,16 @@ include('partial-admin/login-check.php');
                     </tbody>
                 </table>
             </div>
-        </div> <hr>
-        
+            <div class="row my-1">
+                <div class="col-12 text-center">
+                    <a href="view-all-attendance.php" class="btn btn-primary">View All Attendance</a>
+                </div>
+                <div class="col">
+                </div>
+            </div>
+        </div>
+        <hr>
+
         <div class="row my-1">
             <h3 class="fs-4 mb-3">Absent Today</h3>
             <div class="col">

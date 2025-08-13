@@ -35,7 +35,8 @@ if (isset($_GET['delete_id'])) {
             <div class="container-fluid px-4">
                 <div class="row my-4">
                     <div class="col-12">
-                        <h3 class="fs-4 mb-3"><?php echo $page_title; ?></h3>
+                        <div class="card p-4 shadow-sm">
+                        <h3 class="fs-4 mb-5 text-center"><b><?php echo $page_title; ?></b></h3>
                         <?php
                         if (isset($_SESSION['delete_message'])) {
                             echo $_SESSION['delete_message'];
