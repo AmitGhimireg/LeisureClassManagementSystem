@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 12, 2025 at 06:18 PM
+-- Generation Time: Aug 13, 2025 at 12:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -76,8 +76,8 @@ CREATE TABLE `attendance` (
 --
 
 INSERT INTO `attendance` (`att_id`, `teacher_id`, `date`, `status`, `reason`, `recorded_at`) VALUES
-(8, 7, '2025-08-12', 'Absent', 'Sick', '2025-08-12 15:25:40'),
-(9, 2, '2025-08-12', 'Present', 'Hello', '2025-08-12 15:42:36');
+(11, 2, '2025-08-12', 'Present', 'ok', '2025-08-13 08:26:44'),
+(12, 2, '2025-08-13', 'Absent', 'Sick', '2025-08-13 08:27:05');
 
 -- --------------------------------------------------------
 
@@ -120,6 +120,13 @@ CREATE TABLE `contact_msgs` (
   `message` text NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `contact_msgs`
+--
+
+INSERT INTO `contact_msgs` (`cm_id`, `full_name`, `email`, `subject`, `message`, `created_at`) VALUES
+(2, 'Amit Ghimire', 'amitghimire102@gmail.com', 'Inquiry', 'Hello.', '2025-08-13 06:52:29');
 
 -- --------------------------------------------------------
 
@@ -320,7 +327,7 @@ ALTER TABLE `academic_routine`
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `att_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `att_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `classes`
@@ -332,7 +339,7 @@ ALTER TABLE `classes`
 -- AUTO_INCREMENT for table `contact_msgs`
 --
 ALTER TABLE `contact_msgs`
-  MODIFY `cm_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `cm_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `leisure_routines`
