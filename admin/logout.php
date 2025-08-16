@@ -1,10 +1,23 @@
 <?php
-//include constants.php for SUTEURL
 include('../config/constants.php');
 
-//1. destroy the session and redirect to login page
-session_destroy(); // unset $_SESSION['user']
+// Unset all of the session variables.
+$_SESSION = array();
 
-//2.redirect to login page
-header('location:'.SITEURL. 'login.php')
+// If it's desired to kill the session, also delete the session cookie.
+// Note: This will destroy the session, and not just the session data!
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+// Finally, destroy the session.
+session_destroy();
+
+// Redirect to login page
+header('location:'.SITEURL. 'login.php');
+exit(); // It's good practice to call exit() after a header redirect
 ?>
