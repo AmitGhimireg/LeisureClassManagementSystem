@@ -12,9 +12,13 @@ if (!isset($_SESSION['teach_id'])) {
 
 $teach_id = $_SESSION['teach_id'];
 
+// Get the current date in the format YYYY-MM-DD
+$current_date = date('Y-m-d');
+
 // Check if the form is submitted
 if (isset($_POST['submit'])) {
     // Get the data from the form
+    // The date is automatically set to the current date and cannot be changed by the user
     $date = mysqli_real_escape_string($conn, $_POST['date']);
     $status = mysqli_real_escape_string($conn, $_POST['status']);
     $reason = mysqli_real_escape_string($conn, $_POST['reason']);
@@ -63,7 +67,7 @@ if (isset($_POST['submit'])) {
                         <form action="" method="POST">
                             <div class="mb-3">
                                 <label for="date" class="form-label">Date</label>
-                                <input type="date" name="date" class="form-control" id="date" required>
+                                <input type="text" name="date" class="form-control" id="date" value="<?php echo $current_date; ?>" readonly required>
                             </div>
                             <div class="mb-3">
                                 <label for="status" class="form-label">Status</label>
